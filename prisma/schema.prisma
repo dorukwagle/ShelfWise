@@ -1,0 +1,78 @@
+datasource db {
+  provider = "mysql"
+  url = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AccountStatus {
+  Pending
+  Active
+  Rejected
+  Suspended
+}
+
+enum Gender {
+  Male
+  Female
+  Others
+}
+
+enum MembershipTypes {
+  Staff
+  Faculty
+  Tutor
+}
+
+enum UserRoles {
+  Member
+  Admin
+}
+
+model MembershipType {
+  membershipTypeId Int @id @default(autoincrement())
+  type MembershipTypes
+  precedence Int
+  membership Membership[]
+}
+
+model UserRole {
+  roleId Int @id @default(autoincrement())
+  role UserRoles
+  precedence Int
+  user User[]
+}
+
+model User {
+  userId String @id @default(cuid())
+  fullName String
+  dob DateTime
+  address String
+  contactNo String?
+  accountCreationDate DateTime @default(now())
+  enrollmentYear DateTime
+  accountStatus AccountStatus
+  gender Gender
+  roleId Int
+  role UserRole @relation(fields: [roleId], references: [roleId])
+  membershipId String
+  membership Membership @relation(fields: [membershipId], references: [membershipId])
+  roll_number String @unique
+  email String @unique
+  password String
+  created_at DateTime @default(now()) @db.Timestamp(3)
+  updated_at DateTime @updatedAt @db.Timestamp(3)
+  deleted_at DateTime?
+}
+
+model Membership {
+  membershipId String @id @default(cuid())
+  startDate DateTime
+  expiryDate DateTime
+  membershipTypeId Int
+  type MembershipType @relation(fields: [membershipTypeId], references: [membershipTypeId])
+  user User[]
+}
+
