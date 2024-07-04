@@ -9,6 +9,9 @@
     "start": "node dist/server.js",
     "build": "tsc"
   },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "author": "Doruk Wagle",
   "license": "ISC",
   "devDependencies": {
