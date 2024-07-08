@@ -7,45 +7,69 @@ generator client {
   provider = "prisma-client-js"
 }
 
-enum AccountStatus {
+enum EAccountStatus {
   Pending
   Active
+  Inactive
   Rejected
   Suspended
 }
 
-enum Gender {
+enum EGender {
   Male
   Female
   Others
 }
 
-enum MembershipTypes {
+enum EMembershipTypes {
   Staff
   Faculty
   Tutor
 }
 
-enum UserRoles {
+enum EUserRoles {
   Member
-  Admin
+  Coordinator
+  AssistantManager
+  Manager
 }
 
-model MembershipType {
-  membershipTypeId Int @id @default(autoincrement())
-  type MembershipTypes
+enum EBookRequestStatus {
+  Pending
+  Noted
+  Resolved
+}
+
+enum EPaymentType {
+  Membership
+  Penalty
+}
+
+enum EPenaltyStatus {
+  Pending
+  Resolved
+}
+
+enum EPenaltyTypes {
+  PropertyDamage
+  Overdue
+}
+
+model MembershipTypes {
+  membershipTypeId String @id @default(cuid())
+  type EMembershipTypes
   precedence Int
-  membership Membership[]
+  membership Memberships[]
 }
 
-model UserRole {
-  roleId Int @id @default(autoincrement())
-  role UserRoles
+model UserRoles {
+  roleId String @id @default(cuid())
+  role EUserRoles
   precedence Int
-  user User[]
+  user Users[]
 }
 
-model User {
+model Users {
   userId String @id @default(cuid())
   fullName String
   dob DateTime
@@ -53,26 +77,159 @@ model User {
   contactNo String?
   accountCreationDate DateTime @default(now())
   enrollmentYear DateTime
-  accountStatus AccountStatus
-  gender Gender
-  roleId Int
-  role UserRole @relation(fields: [roleId], references: [roleId])
+  gender EGender
+  roleId String
+  role UserRoles @relation(fields: [roleId], references: [roleId])
   membershipId String
-  membership Membership @relation(fields: [membershipId], references: [membershipId])
+  membership Memberships @relation(fields: [membershipId], references: [membershipId])
   roll_number String @unique
   email String @unique
   password String
-  created_at DateTime @default(now()) @db.Timestamp(3)
-  updated_at DateTime @updatedAt @db.Timestamp(3)
-  deleted_at DateTime?
+  accountStatus EAccountStatus @default(Pending)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  bookRequests BookRequests[]
+  notifications Notifications[]
+  penalties Penalties[]
+  Payments Payments[]
 }
 
-model Membership {
+model Memberships {
   membershipId String @id @default(cuid())
   startDate DateTime
   expiryDate DateTime
-  membershipTypeId Int
-  type MembershipType @relation(fields: [membershipTypeId], references: [membershipTypeId])
-  user User[]
+  membershipTypeId String
+  type MembershipTypes @relation(fields: [membershipTypeId], references: [membershipTypeId])
+  user Users[]
 }
 
+model BookRequests {
+  requestId String @id @default(cuid())
+  bookName String
+  authorName String
+  status EBookRequestStatus @default(Pending)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+  userId String
+  user Users @relation(fields: [userId], references: [userId])
+}
+
+model Notifications {
+  notificationId String @id @default(cuid())
+  title String
+  body String
+  icon String @db.VarChar(2050)
+  userId String
+  user Users @relation(fields: [userId], references: [userId])
+  read Boolean @default(false)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model Penalties {
+  penaltyId String @id @default(cuid())
+  description String @db.VarChar(500)
+  amount Float @db.Double
+  status EPenaltyStatus
+  penaltyType EPenaltyTypes @default(Overdue)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+  userId String
+  user Users @relation(fields: [userId], references: [userId])
+}
+
+model Payments {
+  paymentId String @id @default(cuid())
+  amountPaid Float @db.Double
+  paymentType EPaymentType @default(Membership)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+  userId String
+  user Users @relation(fields: [userId], references: [userId])
+}
+
+model BookInfo {
+  bookInfoId String @id @default(cuid())
+  classNumber String @unique
+  bookNumber String @unique
+  Title String
+  subTitle String?
+  editionStatement String?
+  numberOfPages BigInt
+  publicationYear DateTime @db.Date
+  seriesStatement String?
+  addedDate DateTime @default(now())
+  coverPhoto String @db.VarChar(2050)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+  bookAuthors BookWithAuthors[]
+  publisherId String
+  publisher Publishers @relation(fields: [publisherId], references: [publisherId])
+  isbns isbns[]
+  bookGenres BookWithGenres[]
+}
+
+model Authors {
+  authorId String @id @default(cuid())
+  title String?
+  firstName String
+  middleName String?
+  lastName String
+  bookAuthors BookWithAuthors[]
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model BookWithAuthors {
+  bookAuthorId String @id @default(cuid())
+  bookInfoId String
+  authorId String
+  author Authors @relation(fields: [authorId], references: [authorId])
+  bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+}
+
+model Publishers {
+  publisherId String @id @default(cuid())
+  publisherName String
+  address String
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+  bookInfo BookInfo[]
+}
+
+model isbns {
+  isbnId String @id @default(cuid())
+  isbn String @unique
+  bookInfoId String
+  bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+}
+
+model Genres {
+  genreId String @id @default(cuid())
+  genre String
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+  bookGenres BookWithGenres[]
+}
+
+model BookWithGenres {
+  bookGenreId String @id @default(cuid())
+  bookInfoId String
+  genreId String
+  bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
+  genre Genres @relation(fields: [genreId], references: [genreId])
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+}
