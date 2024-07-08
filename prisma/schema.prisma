@@ -88,6 +88,7 @@ model Users {
   dob DateTime
   address String
   contactNo String?
+  profilePicUrl String? @db.VarChar(1000)
   accountCreationDate DateTime @default(now())
   enrollmentYear DateTime
   gender EGender
@@ -106,6 +107,8 @@ model Users {
   penalties Penalties[]
   payments Payments[]
   issues Issues[]
+  comments Comments[]
+  commentsReplies CommentReplies[]
 }
 
 model Memberships {
@@ -177,7 +180,7 @@ model BookInfo {
   publicationYear DateTime @db.Date
   seriesStatement String?
   addedDate DateTime @default(now())
-  coverPhoto String @db.VarChar(2050)
+  coverPhoto String? @db.VarChar(2050)
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
   deletedAt DateTime?
@@ -189,6 +192,7 @@ model BookInfo {
   book Books[]
   purchases BookPurchases[]
   reservations BookReservations[]
+  comments Comments[]
 }
 
 model Authors {
@@ -302,6 +306,42 @@ model BookReservations {
   bookInfoId String
   book Books? @relation(fields: [bookId], references: [bookId])
   bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model OnlineBooks {
+  onlineBookId String @id @default(cuid())
+  purchaseUrl String? @db.VarChar(2050)
+  filePath String? @db.VarChar(1000)
+  title String
+  coverPhoto String? @db.VarChar(1000)
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model Comments {
+  commentId String @id @default(cuid())
+  comment String @db.VarChar(10000)
+  userId String
+  bookInfoId String
+  user Users @relation(fields: [userId], references: [userId])
+  bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
+  replies CommentReplies[]
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model CommentReplies {
+  commentReplyId String @id @default(cuid())
+  reply String @db.VarChar(10000)
+  userId String
+  commentId String
+  user Users @relation(fields: [userId], references: [userId])
+  comment Comments @relation(fields: [commentId], references: [commentId])
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
   deletedAt DateTime?
