@@ -55,6 +55,19 @@ enum EPenaltyTypes {
   Overdue
 }
 
+enum EBooksTypes {
+  Available
+  Reserved
+  Issued
+}
+
+enum EReservationStatus {
+  Pending
+  Cancelled
+  Confirmed
+  Resolved
+}
+
 model MembershipTypes {
   membershipTypeId String @id @default(cuid())
   type EMembershipTypes
@@ -91,7 +104,8 @@ model Users {
   bookRequests BookRequests[]
   notifications Notifications[]
   penalties Penalties[]
-  Payments Payments[]
+  payments Payments[]
+  issues Issues[]
 }
 
 model Memberships {
@@ -172,6 +186,9 @@ model BookInfo {
   publisher Publishers @relation(fields: [publisherId], references: [publisherId])
   isbns isbns[]
   bookGenres BookWithGenres[]
+  book Books[]
+  purchases BookPurchases[]
+  reservations BookReservations[]
 }
 
 model Authors {
@@ -232,4 +249,60 @@ model BookWithGenres {
   genre Genres @relation(fields: [genreId], references: [genreId])
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
+}
+
+model Books {
+  bookId String @id @default(cuid())
+  barcode String @unique
+  status EBooksTypes @default(Available)
+  damagedOn DateTime? @db.Date
+  bookInfoId String
+  bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
+  issues Issues[]
+  reservations BookReservations[]
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model BookPurchases {
+  purchaseId String @id @default(cuid())
+  bookInfoId String
+  pricePerPiece Float @db.Double
+  totalPieces Int
+  bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model Issues {
+  issueId String @id @default(cuid())
+  checkInDate DateTime
+  checkOutDate DateTime?
+  dueDate DateTime
+  renewalRequestedAt DateTime?
+  renewalRequest Boolean @default(false)
+  renewalCount Int @default(0)
+  bookId String
+  book Books @relation(fields: [bookId], references: [bookId])
+  userId String
+  user Users @relation(fields: [userId], references: [userId])
+  issuedBy String
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model BookReservations {
+  reservationId String @id @default(cuid())
+  reservationDate DateTime @db.Timestamp(3) @default(now())
+  status EReservationStatus @default(Pending)
+  bookId String?
+  bookInfoId String
+  book Books? @relation(fields: [bookId], references: [bookId])
+  bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
 }
