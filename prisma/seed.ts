@@ -54,8 +54,8 @@ async function main() {
     // seed membership table
     const managerMembership = await prisma.memberships.create({
         data: {
-            startDate: "2021-01-01",
-            expiryDate: "2022-01-01",
+            startDate: new Date("2021-01-01"),
+            expiryDate: new Date("2022-01-01"),
             membershipTypeId: employeeType.membershipTypeId
         }
     });
@@ -64,7 +64,7 @@ async function main() {
         data: {
                 fullName: "Doruk Wagle",
                 email: "doruk.wagle@gmail.com",
-                dob: "2001-03-03",
+                dob: new Date("2001-03-03"),
                 address: "Kathmandu Nepal",
                 contactNo: "9829293466",
                 gender: "Male",

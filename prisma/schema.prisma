@@ -97,7 +97,7 @@ model Users {
   contactNo String
   profilePicUrl String? @db.VarChar(1000)
   accountCreationDate DateTime @default(now())
-  enrollmentYear DateTime
+  enrollmentYear String @db.VarChar(6)
   gender EGender
   roleId String
   role UserRoles @relation(fields: [roleId], references: [roleId])
