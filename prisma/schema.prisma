@@ -23,9 +23,15 @@ enum EGender {
 }
 
 enum EMembershipTypes {
+  Employee
   Staff
   Faculty
   Tutor
+}
+
+enum EMembershipStatus {
+  Active
+  Inactive
 }
 
 enum EUserRoles {
@@ -88,15 +94,15 @@ model Users {
   fullName String
   dob DateTime
   address String
-  contactNo String?
+  contactNo String
   profilePicUrl String? @db.VarChar(1000)
   accountCreationDate DateTime @default(now())
   enrollmentYear DateTime
   gender EGender
   roleId String
   role UserRoles @relation(fields: [roleId], references: [roleId])
-  membershipId String
-  membership Memberships @relation(fields: [membershipId], references: [membershipId])
+  membershipId String?
+  membership Memberships? @relation(fields: [membershipId], references: [membershipId])
   rollNumber String @unique
   email String @unique
   password String
@@ -118,6 +124,9 @@ model Memberships {
   membershipId String @id @default(cuid())
   startDate DateTime
   expiryDate DateTime
+  renewalCount Int? @default(0)
+  lastRenewalDate DateTime? @db.Timestamp()
+  status EMembershipStatus @default(Active)
   membershipTypeId String
   type MembershipTypes @relation(fields: [membershipTypeId], references: [membershipTypeId])
   user Users[]
