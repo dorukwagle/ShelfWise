@@ -2,10 +2,19 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 async function main() {
-    await prisma.user.createMany({
+    await prisma.users.createMany({
         data: [
             {
-
+                fullName: '',
+                dob: '',
+                address: '',
+                enrollmentYear: '',
+                gender: 'Male',
+                roleId: '',
+                membershipId: '',
+                roll_number: '',
+                email: '',
+                password: ''
             }
         ],
         skipDuplicates: true,

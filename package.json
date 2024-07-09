@@ -22,7 +22,8 @@
     "vitest": "^1.6.0"
   },
   "dependencies": {
-    "@prisma/client": "^5.16.1",
-    "express": "^4.19.2"
+    "@prisma/client": "^5.16.2",
+    "express": "^4.19.2",
+    "prisma": "^5.16.2"
   }
 }
