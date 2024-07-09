@@ -97,7 +97,7 @@ model Users {
   role UserRoles @relation(fields: [roleId], references: [roleId])
   membershipId String
   membership Memberships @relation(fields: [membershipId], references: [membershipId])
-  roll_number String @unique
+  rollNumber String @unique
   email String @unique
   password String
   accountStatus EAccountStatus @default(Pending)
