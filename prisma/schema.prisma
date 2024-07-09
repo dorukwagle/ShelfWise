@@ -5,6 +5,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
 enum EAccountStatus {
@@ -175,7 +176,7 @@ model BookInfo {
   bookInfoId String @id @default(cuid())
   classNumber String @unique
   bookNumber String @unique
-  Title String
+  title String
   subTitle String?
   editionStatement String?
   numberOfPages BigInt
@@ -197,18 +198,20 @@ model BookInfo {
   comments Comments[]
   ratings Ratings[]
   score BookRatingScore[]
+
+  @@fulltext([title, subTitle])
 }
 
 model Authors {
   authorId String @id @default(cuid())
   title String?
-  firstName String
-  middleName String?
-  lastName String
+  fullName String
   bookAuthors BookWithAuthors[]
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
   deletedAt DateTime?
+
+  @@fulltext([fullName])
 }
 
 model BookWithAuthors {
@@ -247,6 +250,8 @@ model Genres {
   updatedAt DateTime @updatedAt @db.Timestamp(3)
   deletedAt DateTime?
   bookGenres BookWithGenres[]
+
+  @@index([genre])
 }
 
 model BookWithGenres {
@@ -271,6 +276,8 @@ model Books {
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
   deletedAt DateTime?
+
+  @@index([barcode])
 }
 
 model BookPurchases {
