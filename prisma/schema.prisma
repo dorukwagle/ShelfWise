@@ -371,3 +371,13 @@ model BookRatingScore {
   updatedAt DateTime @updatedAt @db.Timestamp(3)
   deletedAt DateTime?
 }
+
+model GlobalAttributes {
+  globalAttributeId String @id @default(cuid())
+  penaltyPerDay Float @db.Double
+  membershipValidationMonths Int
+  issueValidityDays Int
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
