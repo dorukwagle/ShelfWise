@@ -110,6 +110,7 @@ model Users {
   comments Comments[]
   commentsReplies CommentReplies[]
   ratings Ratings[]
+  sessions Sessions[]
 }
 
 model Memberships {
@@ -380,4 +381,13 @@ model GlobalAttributes {
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
   deletedAt DateTime?
+}
+
+model Sessions {
+  sessionId BigInt @id @default(autoincrement())
+  session String @unique
+  userId String
+  user Users @relation(fields: [userId], references: [userId])
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  expiresAt DateTime @db.Timestamp(3)
 }
