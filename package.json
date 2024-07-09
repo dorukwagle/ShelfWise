@@ -15,6 +15,7 @@
   "author": "Doruk Wagle",
   "license": "ISC",
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/express": "^4.17.21",
     "@types/node": "^20.14.9",
     "ts-node": "^10.9.2",
@@ -23,7 +24,15 @@
   },
   "dependencies": {
     "@prisma/client": "^5.16.2",
+    "bcryptjs": "^2.4.3",
+    "compression": "^1.7.4",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
     "express": "^4.19.2",
-    "prisma": "^5.16.2"
+    "helmet": "^7.1.0",
+    "multer": "^1.4.5-lts.1",
+    "path": "^0.12.7",
+    "prisma": "^5.16.2",
+    "uuid": "^10.0.0"
   }
 }
