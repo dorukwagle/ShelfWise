@@ -109,6 +109,7 @@ model Users {
   issues Issues[]
   comments Comments[]
   commentsReplies CommentReplies[]
+  ratings Ratings[]
 }
 
 model Memberships {
@@ -193,6 +194,8 @@ model BookInfo {
   purchases BookPurchases[]
   reservations BookReservations[]
   comments Comments[]
+  ratings Ratings[]
+  score BookRatingScore[]
 }
 
 model Authors {
@@ -342,6 +345,28 @@ model CommentReplies {
   commentId String
   user Users @relation(fields: [userId], references: [userId])
   comment Comments @relation(fields: [commentId], references: [commentId])
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model Ratings {
+  ratingId String @id @default(cuid())
+  bookInfoId String
+  userId String
+  rating Int @db.TinyInt @default(0)
+  user Users @relation(fields: [userId], references: [userId])
+  bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
+  createdAt DateTime @default(now()) @db.Timestamp(3)
+  updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
+}
+
+model BookRatingScore {
+  bookRatingScoreId String @id @default(cuid())
+  bookInfoId String
+  score Float @db.Float
+  bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
   deletedAt DateTime?
