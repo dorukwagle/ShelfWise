@@ -403,6 +403,8 @@ model Sessions {
   sessionId BigInt @id @default(autoincrement())
   session String @unique
   userId String
+  rolePrecedence Int
+  role EUserRoles
   user Users @relation(fields: [userId], references: [userId])
   createdAt DateTime @default(now()) @db.Timestamp(3)
   expiresAt DateTime @db.Timestamp(3)

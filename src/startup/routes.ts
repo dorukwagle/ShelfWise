@@ -1,9 +1,10 @@
-import {Express} from "express";
+import express, {Express} from "express";
 import cookieParser from "cookie-parser";
 
 
 const initializeRoutes = (app: Express): void => {
     app.use(cookieParser());
+
 
 }
 
