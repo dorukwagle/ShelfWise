@@ -4,8 +4,8 @@ import {getMyInfo} from "./meModel";
 
 const me = express.Router();
 
-me.get("/me", async (req, res) => {
-    return res.status(200).json(getMyInfo("45"));
+me.get("/", async (req, res) => {
+    return res.status(200).json(await getMyInfo("45"));
 });
 
 export default me;

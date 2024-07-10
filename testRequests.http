@@ -1,0 +1,14 @@
+GET http://localhost:8080/api/me
+Accept: application/json
+Content-Type: application/json
+
+
+### Post request
+POST http://localhost:8080/api/auth/login
+Accept: application/json
+Content-Type: application/json
+
+{
+  "email": "doruk.wagle@gmail.com",
+  "password": "password"
+}
