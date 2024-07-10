@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import {PrismaClient, Sessions} from "@prisma/client";
 import { comparePassword } from "../../utils/hash";
 import { v7 as uuidV7 } from "uuid";
 import type { Users } from "@prisma/client";
@@ -32,4 +32,22 @@ const createSession = async (user: Users): Promise<string> => {
     return session.session;
 }
 
-export { authenticate, createSession };
+const destroySession = async (session: Sessions): Promise<boolean> => {
+    await prisma.sessions.delete({
+        where: {
+            sessionId: session.sessionId
+        }
+    })
+    return true;
+}
+
+const destroyAllSessions = async (session: Sessions) => {
+    await prisma.sessions.deleteMany({
+        where: {
+            userId: session.userId
+        }
+    });
+    return true;
+}
+
+export { authenticate, createSession, destroySession};

@@ -18,5 +18,4 @@ app.use(express.json({limit: "2048mb"}));
 // if (process.env.NODE_ENV === "production") prod(app);
 
 initializeRoutes(app);
-
 export default app;
