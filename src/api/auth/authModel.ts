@@ -1,9 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import { comparePassword } from "../../utils/hash";
-
-const prisma = new PrismaClient();
+import { v7 as uuidV7 } from "uuid";
 import type { Users } from "@prisma/client";
 import getUserInfo from "../../utils/userUtils";
+
+const prisma = new PrismaClient();
 
 const authenticate = async (email: string, password: string): Promise<Users | null> => {
     const user = await getUserInfo(email, true, false);
@@ -13,4 +14,22 @@ const authenticate = async (email: string, password: string): Promise<Users | nu
     return user;
 }
 
-export { authenticate };
+const createSession = async (user: Users): Promise<string> => {
+    const userInfo = await getUserInfo(user.userId, false, true);
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 5); // 5 days validity
+
+    const session = await  prisma.sessions.create({
+       data: {
+           userId: userInfo!.userId,
+           session: uuidV7(),
+           role: userInfo!.role.role,
+           rolePrecedence: userInfo!.role.precedence,
+           expiresAt: expiryDate
+       }
+    });
+
+    return session.session;
+}
+
+export { authenticate, createSession };
