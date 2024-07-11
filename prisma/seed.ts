@@ -1,5 +1,7 @@
-import { PrismaClient } from '@prisma/client'
+import {PrismaClient} from '@prisma/client'
 import {hashPassword} from "../src/utils/hash";
+import {UserRoles} from "../src/constants/enum";
+
 const prisma = new PrismaClient()
 
 async function main() {
@@ -8,7 +10,7 @@ async function main() {
         {
             data: {
                 role: "Manager",
-                precedence: 4
+                precedence: UserRoles.Manager
             }
         }
     );
@@ -17,13 +19,13 @@ async function main() {
         data: [
             {
                 role: "AssistantManager",
-                precedence: 3
+                precedence: UserRoles.AssistantManager
             },{
                 role: "Coordinator",
-                precedence: 2
+                precedence: UserRoles.Coordinator
             },{
                 role: "Member",
-                precedence: 1
+                precedence: UserRoles.Member
             }
         ]
     });

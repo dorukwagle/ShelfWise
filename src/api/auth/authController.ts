@@ -28,6 +28,7 @@ auth.post("/login", async (req: express.Request<{}, any, Credentials>, res) => {
     });
 
     return res.status(200).json(user);
-})
+});
+
 
 export default auth;
