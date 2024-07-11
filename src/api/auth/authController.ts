@@ -19,8 +19,8 @@ auth.post("/login", async (req: express.Request<{}, any, Credentials>, res) => {
 
     const isProd = process.env.NODE_ENV === "production";
 
-    const sessions = await createSession(user);
-    res.cookie("sessionId", JSON.stringify(sessions), {
+    const session = await createSession(user);
+    res.cookie("sessionId", session, {
         httpOnly: true,
         sameSite: isProd,
         secure: isProd,

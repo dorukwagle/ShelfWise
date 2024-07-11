@@ -13,18 +13,26 @@ const msg: {[key: string]: string} = {
 }
 
 const getSession = async(req: Request) => {
-    const sessionCookie = req.cookies["sessionId"];
+    const sessionCookie: string = req.cookies.sessionId;
     if (!sessionCookie) return null;
 
-    return prisma.sessions.findUnique({
+    return prisma.sessions.findFirst({
         where: {
-            session: sessionCookie
+            AND: [
+                {
+                    session: sessionCookie
+                },
+                {
+                    expiresAt: { gte: new Date()}
+                }
+            ]
         }
     });
 }
 
 const authorize = async (req: SessionRequest, res: Response, next: NextFunction) => {
     const session = await getSession(req);
+    // console.log(session);
     if (!session) return res.status(401).send(msg[401]);
     req.session = session;
     next();
