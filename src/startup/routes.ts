@@ -1,4 +1,4 @@
-import express, {Express} from "express";
+import {Express} from "express";
 import cookieParser from "cookie-parser";
 import me from "../api/me/meController";
 import auth from "../api/auth/authController";

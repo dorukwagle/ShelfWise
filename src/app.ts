@@ -1,6 +1,8 @@
 import express from "express";
+import "express-async-errors";
 import cors from "cors";
 import initializeRoutes from "./startup/routes";
+import errorHandler from "./middlewares/errorHandler";
 
 const app = express();
 
@@ -18,4 +20,8 @@ app.use(express.json({limit: "2048mb"}));
 // if (process.env.NODE_ENV === "production") prod(app);
 
 initializeRoutes(app);
+
+// handle and log async errors
+app.use(errorHandler);
+
 export default app;
