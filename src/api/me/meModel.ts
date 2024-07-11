@@ -1,9 +1,9 @@
+import { PrismaClient } from '@prisma/client'
+import getUserInfo from "../../utils/userUtils";
+
 
 const getMyInfo = async (userId: string) => {
-    return {
-      name: "Hey Dude",
-      address: "kathmandu"
-    };
+    return getUserInfo(userId);
 }
 
 const updateMyInfo = async (userId: string) => {
