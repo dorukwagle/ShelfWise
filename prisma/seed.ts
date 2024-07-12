@@ -1,8 +1,7 @@
-import {PrismaClient} from '@prisma/client'
 import {hashPassword} from "../src/utils/hash";
 import {UserRoles} from "../src/constants/enum";
+import prisma from "../src/utils/prisma";
 
-const prisma = new PrismaClient()
 
 async function main() {
     // seed the user roles table

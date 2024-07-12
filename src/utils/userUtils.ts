@@ -1,6 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import prisma from "./prisma";
 
-const prisma = new PrismaClient();
 
 const getUserInfo = async (userIdOrEmail: string,
                            includePassword=false,

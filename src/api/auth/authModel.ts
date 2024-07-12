@@ -1,10 +1,9 @@
-import {PrismaClient, Sessions} from "@prisma/client";
+import { Sessions } from "@prisma/client";
 import { comparePassword } from "../../utils/hash";
 import { v7 as uuidV7 } from "uuid";
 import type { Users } from "@prisma/client";
 import getUserInfo from "../../utils/userUtils";
-
-const prisma = new PrismaClient();
+import prisma from "../../utils/prisma";
 
 const authenticate = async (email: string, password: string): Promise<Users | null> => {
     const user = await getUserInfo(email, true, false);

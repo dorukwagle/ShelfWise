@@ -1,11 +1,8 @@
 import {Request, Response, NextFunction} from "express";
-import {PrismaClient, Sessions} from "@prisma/client";
-import {Session} from "node:inspector";
 import SessionRequest from "../entities/sessionRequest";
 import {UserRoles} from "../constants/enum";
+import prisma from "../utils/prisma";
 
-
-const prisma = new PrismaClient();
 
 const msg: {[key: string]: string} = {
     401: "please login first",
