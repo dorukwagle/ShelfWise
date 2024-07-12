@@ -23,6 +23,7 @@ const gracefulShutdown = () => {
   }, 5000); // Force exit if not closed within 5 seconds
 };
 
+
 process.on('SIGTERM', gracefulShutdown);
 process.on('SIGINT', gracefulShutdown);
 
