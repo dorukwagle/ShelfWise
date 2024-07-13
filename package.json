@@ -4,7 +4,7 @@
   "description": "A modern library management system: digital shelf of books",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "dev": "ts-node src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc"

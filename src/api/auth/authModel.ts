@@ -3,7 +3,10 @@ import { comparePassword } from "../../utils/hash";
 import { v7 as uuidV7 } from "uuid";
 import type { Users } from "@prisma/client";
 import getUserInfo from "../../utils/userUtils";
-import prisma from "../../utils/prisma";
+import prismaClient from "../../utils/prismaClient";
+
+
+const prisma = prismaClient();
 
 const authenticate = async (email: string, password: string): Promise<Users | null> => {
     const user = await getUserInfo(email, true, false);

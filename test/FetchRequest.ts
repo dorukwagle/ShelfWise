@@ -17,8 +17,10 @@ class FetchRequest {
     }
 
     setDefaultHeaders = () => {
-        this.options.headers.append('Accept', 'application/json');
-        this.options.headers.append('Content-Type', 'application/json');
+        this.options.headers = new Headers({
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        });
         return this;
     }
 
@@ -32,24 +34,25 @@ class FetchRequest {
         return this;
     }
 
-    post = async (params?: string, data?: any) => {
+    post = async (params: string = '', data?: any) => {
         this.options.method = "POST";
         this.options.body = JSON.stringify(data || []);
         return fetch(`${this.url}/${params}`, this.options as RequestInit);
     }
 
-    get = async (params?: string) => {
+    get = async (params: string = '') => {
         this.options.method = "GET";
+        console.log(`fetch('${this.url}/${params}', ${JSON.stringify(this.options as RequestInit)})}`);
         return fetch(`${this.url}/${params}`, this.options as RequestInit);
     }
 
-    put = async (params?: string, data?: any) => {
+    put = async (params: string = '', data?: any) => {
         this.options.method = "PUT";
         this.options.body = JSON.stringify(data || []);
         return fetch(`${this.url}/${params}`, this.options as RequestInit);
     }
 
-    delete = async (params?: string) => {
+    delete = async (params: string = '') => {
         this.options.method = "DELETE";
         return fetch(`${this.url}/${params}`, this.options as RequestInit);
     }

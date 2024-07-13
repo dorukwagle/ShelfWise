@@ -21,6 +21,10 @@ app.use(express.json({limit: "2048mb"}));
 
 initializeRoutes(app);
 
+app.get("/", (req, res) => {
+    res.json({"message": "Welcome to my app"});
+})
+
 // handle and log async errors
 app.use(errorHandler);
 

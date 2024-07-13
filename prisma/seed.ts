@@ -1,6 +1,6 @@
 import {hashPassword} from "../src/utils/hash";
 import {UserRoles} from "../src/constants/enum";
-import prisma from "../src/utils/prisma";
+import prisma from "../src/utils/prismaClient";
 
 
 async function main() {

@@ -1,8 +1,10 @@
 import {Request, Response, NextFunction} from "express";
 import SessionRequest from "../entities/sessionRequest";
 import {UserRoles} from "../constants/enum";
-import prisma from "../utils/prisma";
+import prismaClient from "../utils/prismaClient";
 
+
+const prisma = prismaClient();
 
 const msg: {[key: string]: string} = {
     401: "please login first",

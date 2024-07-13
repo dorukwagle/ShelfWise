@@ -7,8 +7,10 @@ const databaseUrl: {[key: string]: string} = {
     "test": process.env.TEST_DATABASE_URL || "",
 }
 
-const prisma = new PrismaClient({
-    datasourceUrl: databaseUrl[process.env.NODE_ENV || "development"],
-});
+const prismaClient = () => {
+    return new PrismaClient({
+        datasourceUrl: databaseUrl[process.env.NODE_ENV || "development"],
+    });
+}
 
-export default prisma;
+export default prismaClient;
