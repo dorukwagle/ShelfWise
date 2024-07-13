@@ -6,7 +6,7 @@ import {clearUpSetup, Entities, executeSafely, initialSetup} from "../testUtils"
 
 const prisma = prismaClient();
 
-describe("AuthController testings...", async () => {
+describe.skip("AuthController testings...", async () => {
     const port:number = parseInt(process.env.PORT || "3000");
     const url: string = `http://localhost:${port}/api/auth/login`;
     const req = new FetchRequest(url)

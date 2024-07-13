@@ -41,7 +41,7 @@ const clearUpSetup = async () => {
 }
 
 const initialSetup = async () => {
-    server = app.listen(port, '0.0.0.0');
+    server = app.listen(port);
     Entities.userRoles = await prisma.userRoles.create(
         {
             data: {
