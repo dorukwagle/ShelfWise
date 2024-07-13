@@ -8,11 +8,15 @@ import prismaClient from "../../utils/prismaClient";
 
 const prisma = prismaClient();
 
-const authenticate = async (email: string, password: string): Promise<Users | null> => {
-    const user = await getUserInfo(email, true, false);
+interface CustomUser extends Omit<Users, 'password'> {
+    password?: string;
+}
 
-    if (!user || !await comparePassword(password, user.password)) return null;
+const authenticate = async (email: string, password: string): Promise<CustomUser | null> => {
+    const user = await getUserInfo(email, true, false) as CustomUser;
 
+    if (!user || !await comparePassword(password, (user.password || ''))) return null;
+    delete user.password;
     return user;
 }
 

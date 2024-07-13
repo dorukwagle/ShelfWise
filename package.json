@@ -4,7 +4,7 @@
   "description": "A modern library management system: digital shelf of books",
   "main": "index.js",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest --no-file-parallelism",
     "dev": "ts-node src/server.ts",
     "start": "node dist/server.js",
     "build": "tsc"

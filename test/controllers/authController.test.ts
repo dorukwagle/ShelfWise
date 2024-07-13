@@ -6,7 +6,7 @@ import {clearUpSetup, Entities, executeSafely, initialSetup} from "../testUtils"
 
 const prisma = prismaClient();
 
-describe.skip("AuthController testings...", async () => {
+describe("AuthController testings...", async () => {
     const port:number = parseInt(process.env.PORT || "3000");
     const url: string = `http://localhost:${port}/api/auth/login`;
     const req = new FetchRequest(url)
@@ -18,11 +18,15 @@ describe.skip("AuthController testings...", async () => {
 
 
     beforeAll(async () => {
+        console.log("beforeAll of authController");
         await initialSetup();
+        // await new Promise(resolve => setTimeout(() => resolve(true), 10000));
     });
 
     afterAll(async () => {
+        console.log("after all of authController");
         await clearUpSetup();
+        // await new Promise(resolve => setTimeout(() => resolve(true), 10000));
     });
 
     describe("/api/login", async () => {

@@ -1,5 +1,6 @@
 import express from "express";
 import {authenticate, createSession} from "./authModel";
+import {Users} from "@prisma/client";
 
 
 const auth = express.Router();
@@ -19,7 +20,7 @@ auth.post("/login", async (req: express.Request<{}, any, Credentials>, res) => {
 
     const isProd = process.env.NODE_ENV === "production";
 
-    const session = await createSession(user);
+    const session = await createSession(user as Users);
     res.cookie("sessionId", session, {
         httpOnly: true,
         sameSite: isProd,

@@ -5,11 +5,15 @@ import getUserInfo from "../../src/utils/userUtils";
 
 describe("userUtils", async () => {
     beforeAll(async () => {
+        console.log("before all of userUtils");
         await initialSetup();
+        // await new Promise(resolve => setTimeout(() => resolve(true), 10000));
     });
 
     afterAll(async () => {
+        console.log("after all of userUtils");
         await clearUpSetup();
+        // await new Promise(resolve => setTimeout(() => resolve(true), 10000));
     });
 
     it("should return user info with password if (id, true, true)", async () => {
