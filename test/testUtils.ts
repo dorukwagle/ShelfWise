@@ -5,6 +5,10 @@ import {hashPassword} from "../src/utils/hash";
 import {Users, UserRoles as UserRolesType, MembershipTypes, Memberships} from "@prisma/client";
 import {Server} from "node:http";
 import {UserRoles} from "../src/constants/enum";
+import {Express} from "express";
+import {assistantManagerAuth, authorize, coordinatorAuth, managerAuth, memberAuth} from "../src/middlewares/auth";
+import SessionRequest from "../src/entities/sessionRequest";
+import getUserInfo from "../src/utils/userUtils";
 
 vi.stubEnv('NODE_ENV', 'test');
 
@@ -40,6 +44,23 @@ const clearUpSetup = async () => {
     await prisma.userRoles.deleteMany();
     await prisma.$disconnect();
     server.close();
+}
+
+const createAuthorizationTestRoutes = () => {
+    app.get("/auth", authorize, async (req: SessionRequest, res) =>
+        res.status(200).send(await getUserInfo(req.session!.userId)));
+
+    app.get("/member", memberAuth, async (req: SessionRequest, res) =>
+        res.status(200).send(await getUserInfo(req.session!.userId)));
+
+    app.get("/coordinator", coordinatorAuth, async (req: SessionRequest, res) =>
+        res.status(200).send(await getUserInfo(req.session!.userId)));
+
+    app.get("/assistant", assistantManagerAuth, async (req: SessionRequest, res) =>
+        res.status(200).send(await getUserInfo(req.session!.userId)));
+
+    app.get("/manager", managerAuth, async (req: SessionRequest, res) =>
+        res.status(200).send(await getUserInfo(req.session!.userId)));
 }
 
 const initialSetup = async () => {
@@ -87,6 +108,6 @@ const initialSetup = async () => {
 }
 
 export {
-    Entities, initialSetup, clearUpSetup, executeSafely
+    Entities, initialSetup, clearUpSetup, executeSafely, createAuthorizationTestRoutes
 }
 

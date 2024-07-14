@@ -6,10 +6,11 @@ import prismaClient from "../utils/prismaClient";
 
 const prisma = prismaClient();
 
-const msg: {[key: string]: string} = {
-    401: "please login first",
-    403: "permission denied: you are not allowed here",
+const msg: {[key: string]: {error:string}} = {
+    401: {error: "please login first"},
+    403: {error: "permission denied: you are not allowed here"}
 }
+
 
 const getSession = async(req: Request) => {
     const sessionCookie: string = req.cookies.sessionId;
@@ -31,8 +32,9 @@ const getSession = async(req: Request) => {
 
 const authorize = async (req: SessionRequest, res: Response, next: NextFunction) => {
     const session = await getSession(req);
-    // console.log(session);
-    if (!session) return res.status(401).send(msg[401]);
+    console.log(await prisma.sessions.findMany())
+    console.log(session, req.cookies.sessionId);
+    if (!session) return res.status(401).json(msg[401]);
     req.session = session;
     next();
 }
@@ -40,7 +42,7 @@ const authorize = async (req: SessionRequest, res: Response, next: NextFunction)
 const authGeneric = async (req: SessionRequest, res: Response, next: NextFunction, rolePrecedence: number) => {
     const session = await getSession(req);
     if (!req.session) return session;
-    if (req.session.rolePrecedence < rolePrecedence) return res.status(403).send(msg[403]);
+    if (req.session.rolePrecedence < rolePrecedence) return res.status(403).json(msg[403]);
 
     next();
 }

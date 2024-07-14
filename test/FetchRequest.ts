@@ -25,7 +25,7 @@ class FetchRequest {
     }
 
     setCookie = (name: string, value: string) => {
-        this.options.headers.append('Cookie', `${name}=${value}`);
+        this.options.headers.set('Cookie', `${name}=${value}`);
         return this;
     }
 
@@ -42,7 +42,6 @@ class FetchRequest {
 
     get = async (params: string = '') => {
         this.options.method = "GET";
-        console.log(`fetch('${this.url}/${params}', ${JSON.stringify(this.options as RequestInit)})}`);
         return fetch(`${this.url}/${params}`, this.options as RequestInit);
     }
 
