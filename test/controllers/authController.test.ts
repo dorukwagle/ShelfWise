@@ -18,15 +18,11 @@ describe("AuthController testings...", async () => {
 
 
     beforeAll(async () => {
-        console.log("beforeAll of authController");
         await initialSetup();
-        // await new Promise(resolve => setTimeout(() => resolve(true), 10000));
     });
 
     afterAll(async () => {
-        console.log("after all of authController");
         await clearUpSetup();
-        // await new Promise(resolve => setTimeout(() => resolve(true), 10000));
     });
 
     describe("/api/login", async () => {
@@ -85,20 +81,19 @@ describe("AuthController testings...", async () => {
         });
 
         it("should return sessionId and return it if correct email & password is given", async () => {
-            const res = await executeSafely<Promise<Response>>(() => req.post("", validCredential));
+            await prisma.sessions.deleteMany();
 
+            const res = await executeSafely<Promise<Response>>(() => req.post("", validCredential));
             const sessionData = await prisma.sessions.findFirst({
                 where: { userId: Entities.user.userId },
             });
 
             expect(res).toBeTruthy();
-
             const session = res!.headers.getSetCookie()[0];
 
             expect.soft(res!.status).toBe(200);
             expect.soft(session).toContain("sessionId");
-            expect.soft(sessionData?.session).toBe(session.split('=')[1]);
+            expect.soft(session).toContain(sessionData?.session);
         });
-
     });
 })
