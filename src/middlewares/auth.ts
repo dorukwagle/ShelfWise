@@ -30,35 +30,39 @@ const getSession = async(req: Request) => {
     });
 }
 
-const authorize = async (req: SessionRequest, res: Response, next: NextFunction) => {
+
+
+const authGeneral = async (req: SessionRequest, res: Response) => {
     const session = await getSession(req);
-    console.log(await prisma.sessions.findMany())
-    console.log(session, req.cookies.sessionId);
     if (!session) return res.status(401).json(msg[401]);
     req.session = session;
+}
+
+const authorize = async (req: SessionRequest, res: Response, next: NextFunction) => {
+    const auth = await authGeneral(req, res);
+    if (!req.session) return auth;
     next();
 }
 
-const authGeneric = async (req: SessionRequest, res: Response, next: NextFunction, rolePrecedence: number) => {
-    const session = await getSession(req);
-    if (!req.session) return session;
+const validateAuthority = async (req: SessionRequest, res: Response, next: NextFunction, rolePrecedence: number) => {
+    const auth = await authGeneral(req, res);
+    if (!req.session) return auth;
     if (req.session.rolePrecedence < rolePrecedence) return res.status(403).json(msg[403]);
-
     next();
 }
 
 const memberAuth = async (req: SessionRequest, res: Response, next: NextFunction) =>
-    await authGeneric(req, res, next, UserRoles.Member);
+    await validateAuthority(req, res, next, UserRoles.Member);
 
 
 const coordinatorAuth = async (req: SessionRequest, res: Response, next: NextFunction) =>
-    await authGeneric(req, res, next, UserRoles.Coordinator);
+    await validateAuthority(req, res, next, UserRoles.Coordinator);
 
 const assistantManagerAuth = async (req: SessionRequest, res: Response, next: NextFunction) =>
-    await authGeneric(req, res, next, UserRoles.AssistantManager);
+    await validateAuthority(req, res, next, UserRoles.AssistantManager);
 
 const managerAuth = async (req: SessionRequest, res: Response, next: NextFunction) =>
-    await authGeneric(req, res, next, UserRoles.Manager);
+    await validateAuthority(req, res, next, UserRoles.Manager);
 
 export {
     authorize,
