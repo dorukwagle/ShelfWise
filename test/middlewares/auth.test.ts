@@ -28,6 +28,21 @@ describe("authorization test", async () => {
         }
     });
 
+    const updateSessionValidity = async (days: number) => {
+        const date = new Date();
+        date.setDate(date.getDate() +  days);
+
+        await prisma.sessions.update({
+            where: {
+                sessionId: session.sessionId
+            },
+            data: {
+                ...session,
+                expiresAt: date
+            }
+        });
+    };
+
     beforeAll(async () => {
         createAuthorizationTestRoutes();
         await initialSetup();
@@ -83,16 +98,7 @@ describe("authorization test", async () => {
         });
 
         it("should return 401 if expired session is given", async () => {
-            date.setDate(date.getDate() - 5); // decrease 5 days
-            await prisma.sessions.update({
-                where: {
-                    sessionId: session.sessionId
-                },
-                data: {
-                    ...session,
-                    expiresAt: date
-                }
-            });
+            await updateSessionValidity(-5); // decrease by 5 days. i.e. expire session
 
             const res = await req.setCookie("sessionId", sessionId)
                 .get();
@@ -107,16 +113,7 @@ describe("authorization test", async () => {
         const req = request("http://localhost:8080/member");
 
         beforeAll(async () => {
-            date.setDate(new Date().getDate() + 1);
-            await prisma.sessions.update({
-                where: {
-                    sessionId: session.sessionId
-                },
-                data: {
-                    ...session,
-                    expiresAt: date
-                }
-            });
+            await updateSessionValidity(2); // update validity by 2 days
         });
 
         beforeEach(async () => {
@@ -146,4 +143,56 @@ describe("authorization test", async () => {
             expect.soft(await res.json()).toMatchObject(partialUser);
         });
     });
+
+    describe("assistant manager authorization test", async () => {
+        const req = request("http://localhost:8080/assistant");
+
+        beforeAll(async () => {
+            await updateSessionValidity(2);
+        });
+
+        beforeEach(async () => {
+            req.setCookie('sessionId', session.session);
+        });
+
+        it("should return 401 if invalid session", async  () => {
+            req.setCookie('sessionId', v7());
+            const res = await req.get();
+
+            expect.soft(res?.status).toBe(401);
+            expect.soft((await res.json()).error).toBeTruthy();
+        });
+
+        it("should return 401 if session expired", async () => {
+            await updateSessionValidity(-3);
+            const res = await req.get();
+
+            expect.soft(res?.status).toBe(401);
+            expect.soft((await res.json()).error).toBeTruthy();
+        });
+
+        it("should return data if accessed by assistant manager", async () => {
+            await updatePrecedence(UserRoles.AssistantManager);
+            const res = await req.get();
+
+            expect.soft(res?.status).toBe(200);
+            expect.soft(await res.json()).toMatchObject(partialUser);
+        });
+
+        it("should return data if accessed by higher authority user", async () => {
+            await updatePrecedence(UserRoles.Manager);
+            const res = await req.get();
+
+            expect.soft(res?.status).toBe(200);
+            expect.soft(await res.json()).toMatchObject(partialUser);
+        });
+
+        it("should return 403 forbidden, if accessed by lower authority user", async () => {
+            await updatePrecedence(UserRoles.Coordinator);
+            const res = await req.get();
+
+            expect.soft(res?.status).toBe(403);
+            expect.soft((await res.json()).error).toBeTruthy();
+        });
+    })
 });
