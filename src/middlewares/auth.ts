@@ -30,8 +30,6 @@ const getSession = async(req: Request) => {
     });
 }
 
-
-
 const authGeneral = async (req: SessionRequest, res: Response) => {
     const session = await getSession(req);
     if (!session) return res.status(401).json(msg[401]);

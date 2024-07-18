@@ -3,6 +3,7 @@ import "express-async-errors";
 import cors from "cors";
 import initializeRoutes from "./startup/routes";
 import errorHandler from "./middlewares/errorHandler";
+import routesLogger from "./startup/routesLogger";
 
 const app = express();
 
@@ -19,11 +20,16 @@ app.use(express.json({limit: "2048mb"}));
 // apply production settings and protections
 // if (process.env.NODE_ENV === "production") prod(app);
 
+if (process.env.NODE_ENV === "development")
+    app.use(routesLogger);
+
 initializeRoutes(app);
 
 app.get("/", (req, res) => {
     res.json({"message": "Welcome to my app"});
-})
+});
+
+type runFun = (req: express.Request, res: express.Response, next: express.NextFunction) => void;
 
 // handle and log async errors
 app.use(errorHandler);
