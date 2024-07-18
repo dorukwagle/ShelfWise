@@ -20,7 +20,7 @@ const gracefulShutdown = () => {
   setTimeout(() => {
     console.log('Forcefully terminated');
     process.exit(1)
-  }, 5000); // Force exit if not closed within 5 seconds
+  }, 2000); // Force exit if not closed within 2 seconds
 };
 
 
