@@ -10,7 +10,7 @@ const app = express();
 if (process.env.NODE_ENV === "development") {
     app.use(cors({
         credentials: true,
-        origin: ["http://localhost:3000", "*"],
+        origin: ["http://localhost:5173", "*"],
     }));
 }
 
@@ -28,8 +28,6 @@ initializeRoutes(app);
 app.get("/", (req, res) => {
     res.json({"message": "Welcome to my app"});
 });
-
-type runFun = (req: express.Request, res: express.Response, next: express.NextFunction) => void;
 
 // handle and log async errors
 app.use(errorHandler);
