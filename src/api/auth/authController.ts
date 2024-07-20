@@ -1,6 +1,9 @@
 import express from "express";
 import {authenticate, createSession} from "./authModel";
 import {Users} from "@prisma/client";
+import SessionRequest from "../../entities/sessionRequest";
+import {authorize} from "../../middlewares/auth";
+import prismaClient from "../../utils/prismaClient";
 
 
 const auth = express.Router();
@@ -28,8 +31,18 @@ auth.post("/login", async (req: express.Request<{}, any, Credentials>, res) => {
         maxAge: 60 * 60 * 24 * 6 * 1000, // 6 days
     });
 
-    return res.status(200).json(user);
+    res.status(200).json(user);
 });
+
+auth.delete("/logout", authorize, async (req: SessionRequest, res) => {
+    await prismaClient.sessions.delete({
+        where: {
+            sessionId: req.session?.sessionId
+        }
+    });
+
+    res.status(200).end();
+})
 
 
 export default auth;
