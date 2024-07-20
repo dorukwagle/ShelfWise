@@ -4,7 +4,7 @@ import prismaClient from "../../utils/prismaClient";
 const roles = express.Router();
 
 roles.get("/:detailed?", async (req, res) => {
-    const data = await prismaClient().userRoles.findMany();
+    const data = await prismaClient.userRoles.findMany();
     if (req.params.detailed) return res.json(data);
 
     const roles:{[key: string]: number} = {};

@@ -13,9 +13,6 @@ import getUserInfo from "../src/utils/userUtils";
 vi.stubEnv('NODE_ENV', 'test');
 
 
-const prisma = prismaClient();
-
-
 interface IEntities {
     user: Users
     userRoles: UserRolesType
@@ -39,10 +36,10 @@ const executeSafely = async <T>(func: () => T) => {
 }
 
 const clearUpSetup = async () => {
-    await prisma.sessions.deleteMany();
-    await prisma.users.deleteMany();
-    await prisma.userRoles.deleteMany();
-    await prisma.$disconnect();
+    await prismaClient.sessions.deleteMany();
+    await prismaClient.users.deleteMany();
+    await prismaClient.userRoles.deleteMany();
+    await prismaClient.$disconnect();
     server.close();
 }
 
@@ -65,7 +62,7 @@ const createAuthorizationTestRoutes = () => {
 
 const initialSetup = async () => {
     server = app.listen(port);
-    Entities.userRoles = await prisma.userRoles.create(
+    Entities.userRoles = await prismaClient.userRoles.create(
         {
             data: {
                 role: "Manager",
@@ -74,14 +71,14 @@ const initialSetup = async () => {
         }
     );
 
-    Entities.membershipType = await prisma.membershipTypes.create({
+    Entities.membershipType = await prismaClient.membershipTypes.create({
         data: {
             type: "Employee",
             precedence: 1
         }
     });
 
-    Entities.membership = await prisma.memberships.create({
+    Entities.membership = await prismaClient.memberships.create({
         data: {
             startDate: new Date("2021-01-01"),
             expiryDate: new Date("2022-01-01"),
@@ -89,7 +86,7 @@ const initialSetup = async () => {
         }
     });
 
-    Entities.user = await prisma.users.create({
+    Entities.user = await prismaClient.users.create({
         data: {
             fullName: "Doruk Wagle",
             email: "testing@gmail.com",

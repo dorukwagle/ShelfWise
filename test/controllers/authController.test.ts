@@ -4,8 +4,6 @@ import FetchRequest from "../FetchRequest";
 import {clearUpSetup, Entities, executeSafely, initialSetup} from "../testUtils";
 
 
-const prisma = prismaClient();
-
 describe("AuthController testings...", async () => {
     const port:number = parseInt(process.env.PORT || "3000");
     const url: string = `http://localhost:${port}/api/auth/login`;
@@ -81,10 +79,10 @@ describe("AuthController testings...", async () => {
         });
 
         it("should return sessionId and return it if correct email & password is given", async () => {
-            await prisma.sessions.deleteMany();
+            await prismaClient.sessions.deleteMany();
 
             const res = await executeSafely<Promise<Response>>(() => req.post("", validCredential));
-            const sessionData = await prisma.sessions.findFirst({
+            const sessionData = await prismaClient.sessions.findFirst({
                 where: { userId: Entities.user.userId },
             });
 

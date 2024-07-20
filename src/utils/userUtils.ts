@@ -1,11 +1,10 @@
 import prismaClient from "./prismaClient";
 
-const prisma = prismaClient();
 
 const getUserInfo = async (userIdOrEmail: string,
                            includePassword = false,
                            includeChildren = true) => {
-    return prisma.users.findFirst({
+    return prismaClient.users.findFirst({
         where: {
             OR: [
                 { email: userIdOrEmail },

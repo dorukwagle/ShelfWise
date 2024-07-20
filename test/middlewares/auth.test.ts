@@ -7,7 +7,6 @@ import FetchRequest from "../FetchRequest";
 import {Sessions} from "@prisma/client";
 
 
-const prisma = prismaClient();
 
 describe("authorization test", async () => {
     const date = new Date();
@@ -18,7 +17,7 @@ describe("authorization test", async () => {
     let sessionId: string;
     let partialUser = {};
 
-    const updatePrecedence = (precedence: number) => prisma.sessions.update({
+    const updatePrecedence = (precedence: number) => prismaClient.sessions.update({
         where: {
             sessionId: session.sessionId
         },
@@ -32,7 +31,7 @@ describe("authorization test", async () => {
         const date = new Date();
         date.setDate(date.getDate() +  days);
 
-        await prisma.sessions.update({
+        await prismaClient.sessions.update({
             where: {
                 sessionId: session.sessionId
             },
@@ -46,7 +45,7 @@ describe("authorization test", async () => {
     beforeAll(async () => {
         createAuthorizationTestRoutes();
         await initialSetup();
-        session = await prisma
+        session = await prismaClient
             .sessions.create({
                 data: {
                     userId: Entities.user.userId,

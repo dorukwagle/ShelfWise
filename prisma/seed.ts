@@ -2,11 +2,9 @@ import {hashPassword} from "../src/utils/hash";
 import {UserRoles} from "../src/constants/enum";
 import prismaClient from "../src/utils/prismaClient";
 
-const prisma = prismaClient();
-
 async function main() {
     // seed the user roles table
-    const managerRole = await prisma.userRoles.create(
+    const managerRole = await prismaClient.userRoles.create(
         {
             data: {
                 role: "Manager",
@@ -15,7 +13,7 @@ async function main() {
         }
     );
 
-    await prisma.userRoles.createMany({
+    await prismaClient.userRoles.createMany({
         data: [
             {
                 role: "AssistantManager",
@@ -31,14 +29,14 @@ async function main() {
     });
 
     // seed the membership table
-    const employeeType = await prisma.membershipTypes.create({
+    const employeeType = await prismaClient.membershipTypes.create({
         data: {
             type: "Employee",
             precedence: 1
         }
     });
 
-    await prisma.membershipTypes.createMany({
+    await prismaClient.membershipTypes.createMany({
         data: [
             {
                 type: "Faculty",
@@ -54,7 +52,7 @@ async function main() {
     });
 
     // seed membership table
-    const managerMembership = await prisma.memberships.create({
+    const managerMembership = await prismaClient.memberships.create({
         data: {
             startDate: new Date("2021-01-01"),
             expiryDate: new Date("2022-01-01"),
@@ -62,7 +60,7 @@ async function main() {
         }
     });
 
-    const user = await prisma.users.create({
+    const user = await prismaClient.users.create({
         data: {
                 fullName: "Doruk Wagle",
                 email: "doruk.wagle@gmail.com",
@@ -82,10 +80,10 @@ async function main() {
 
 main()
     .then(async () => {
-        await prisma.$disconnect()
+        await prismaClient.$disconnect()
     })
     .catch(async (e) => {
         console.error(e)
-        await prisma.$disconnect()
+        await prismaClient.$disconnect()
         process.exit(1)
     })

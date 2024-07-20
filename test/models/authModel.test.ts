@@ -3,7 +3,6 @@ import {clearUpSetup, Entities, initialSetup} from "../testUtils";
 import {createSession} from "../../src/api/auth/authModel";
 import prismaClient from "../../src/utils/prismaClient";
 
-const prisma = prismaClient();
 
 describe("authModel -> createSession", () => {
     beforeAll(async () => {
@@ -16,7 +15,7 @@ describe("authModel -> createSession", () => {
 
     it("should save the session to the database and return it", async () => {
         const sessionReturned = await createSession(Entities.user);
-        const expectedSession = await prisma.sessions.findFirst({
+        const expectedSession = await prismaClient.sessions.findFirst({
             where: {
                 userId: Entities.user.userId
             }

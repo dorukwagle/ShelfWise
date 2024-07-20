@@ -4,8 +4,6 @@ import {UserRoles} from "../constants/enum";
 import prismaClient from "../utils/prismaClient";
 
 
-const prisma = prismaClient();
-
 const msg: {[key: string]: {error:string}} = {
     401: {error: "please login first"},
     403: {error: "permission denied: you are not allowed here"}
@@ -16,7 +14,7 @@ const getSession = async(req: Request) => {
     const sessionCookie: string = req.cookies.sessionId;
     if (!sessionCookie) return null;
 
-    return prisma.sessions.findFirst({
+    return prismaClient.sessions.findFirst({
         where: {
             AND: [
                 {

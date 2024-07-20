@@ -6,8 +6,6 @@ import getUserInfo from "../../utils/userUtils";
 import prismaClient from "../../utils/prismaClient";
 
 
-const prisma = prismaClient();
-
 interface CustomUser extends Omit<Users, 'password'> {
     password?: string;
 }
@@ -25,7 +23,7 @@ const createSession = async (user: Users): Promise<string> => {
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 5); // 5 days validity
 
-    const session = await  prisma.sessions.create({
+    const session = await  prismaClient.sessions.create({
        data: {
            userId: userInfo!.userId,
            session: uuidV7(),
@@ -39,7 +37,7 @@ const createSession = async (user: Users): Promise<string> => {
 }
 
 const destroySession = async (session: Sessions): Promise<boolean> => {
-    await prisma.sessions.delete({
+    await prismaClient.sessions.delete({
         where: {
             sessionId: session.sessionId
         }
@@ -48,7 +46,7 @@ const destroySession = async (session: Sessions): Promise<boolean> => {
 }
 
 const destroyAllSessions = async (session: Sessions) => {
-    await prisma.sessions.deleteMany({
+    await prismaClient.sessions.deleteMany({
         where: {
             userId: session.userId
         }
