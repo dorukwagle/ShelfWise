@@ -12,8 +12,12 @@ interface CustomUser extends Omit<Users, 'password'> {
 
 const authenticate = async (email: string, password: string): Promise<CustomUser | null> => {
     const user = await getUserInfo(email, true, false) as CustomUser;
+    if (!user) return null;
 
-    if (!user || !await comparePassword(password, (user.password || ''))) return null;
+    // check if the account is active
+    if (user.accountStatus !== "Active") return null;
+
+    if (!await comparePassword(password, (user.password || ''))) return null;
     delete user.password;
     return user;
 }

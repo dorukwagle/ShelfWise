@@ -93,5 +93,25 @@ describe("AuthController testings...", async () => {
             expect.soft(session).toContain("sessionId");
             expect.soft(session).toContain(sessionData?.session);
         });
+
+        it("should return 401 if login attempted by accounts status not Active", async () => {
+            // update account to have inactive status
+            await prismaClient.users.update({
+                where: {
+                    userId: Entities.user.userId
+                },
+                data: {
+                    accountStatus: "Pending"
+                }
+            });
+
+            const res = await executeSafely<Promise<Response>>(() => req.post("", validCredential));
+
+            expect(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(res!.status).toBe(401);
+            expect.soft(data.error).toContain("Incorrect");
+        });
     });
-})
+});
