@@ -2,28 +2,29 @@ import {afterAll, beforeAll, describe, expect, it} from "vitest";
 import prismaClient from "../../src/utils/prismaClient";
 import FetchRequest from "../FetchRequest";
 import {clearUpSetup, Entities, executeSafely, initialSetup} from "../testUtils";
+import {v7} from "uuid";
 
 
 describe("AuthController testings...", async () => {
     const port:number = parseInt(process.env.PORT || "3000");
-    const url: string = `http://localhost:${port}/api/auth/login`;
-    const req = new FetchRequest(url)
-        .setDefaultHeaders();
+    const url: string = `http://localhost:${port}/api/auth`;
     const validCredential = {
         "email": "testing@gmail.com",
         "password": "manager123",
     };
 
+    describe("/api/auth/login", async () => {
+        beforeAll(async () => {
+            await initialSetup();
+        });
 
-    beforeAll(async () => {
-        await initialSetup();
-    });
+        afterAll(async () => {
+            await clearUpSetup();
+        });
 
-    afterAll(async () => {
-        await clearUpSetup();
-    });
+        const  req = new FetchRequest(url + "/login")
+            .setDefaultHeaders();
 
-    describe("/api/login", async () => {
         it("should return 401 if email and password is not given", async () => {
             const res = await executeSafely<Promise<Response>>(() => req.post());
 
@@ -112,6 +113,55 @@ describe("AuthController testings...", async () => {
 
             expect.soft(res!.status).toBe(401);
             expect.soft(data.error).toContain("Incorrect");
+        });
+    });
+
+    describe("/api/auth/logout", async () => {
+        const req = new FetchRequest(url + "/logout")
+            .setDefaultHeaders();
+
+        beforeAll(async () => {
+            await initialSetup();
+        });
+
+        afterAll(async () => {
+            await clearUpSetup();
+        });
+
+        it("should return 401 status if not logged in", async () => {
+            const res = await executeSafely<Promise<Response>>(() => req.delete());
+
+            expect(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(res!.status).toBe(401);
+            expect.soft(data.error).toContain("login");
+        });
+
+        it("should return 200 if logged in and session should be deleted", async () => {
+            const date = new Date();
+            date.setDate(date.getDate() + 1);
+
+            const sess = await prismaClient.sessions.create({
+               data: {
+                   userId: Entities.user.userId,
+                   role: "Member",
+                   rolePrecedence: 5,
+                   session: v7(),
+                   expiresAt: date
+               }
+            });
+
+            const res = await req.setCookie("sessionId", sess.session).delete();
+
+            expect(res).toBeTruthy();
+            expect(res.status).toBe(200);
+
+            const sessionCheck = await prismaClient.sessions.findFirst({
+                where: { sessionId: sess.sessionId }
+            });
+
+            expect(sessionCheck).toBeFalsy();
         });
     });
 });
