@@ -5,7 +5,6 @@ import {hashPassword} from "../src/utils/hash";
 import {Users, UserRoles as UserRolesType, MembershipTypes, Memberships} from "@prisma/client";
 import {Server} from "node:http";
 import {UserRoles} from "../src/constants/enum";
-import {Express} from "express";
 import {assistantManagerAuth, authorize, coordinatorAuth, managerAuth, memberAuth} from "../src/middlewares/auth";
 import SessionRequest from "../src/entities/sessionRequest";
 import getUserInfo from "../src/utils/userUtils";
@@ -21,7 +20,7 @@ interface IEntities {
 }
 
 let server:Server;
-const port = process.env.PORT || 3000;
+export const port = process.env.PORT || 3000;
 
 
 const Entities: IEntities = {} as IEntities;

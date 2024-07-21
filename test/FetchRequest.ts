@@ -36,7 +36,7 @@ class FetchRequest {
 
     post = async (params: string = '', data?: any) => {
         this.options.method = "POST";
-        this.options.body = JSON.stringify(data || []);
+        this.options.body = JSON.stringify(data || {});
         return fetch(`${this.url}/${params}`, this.options as RequestInit);
     }
 
