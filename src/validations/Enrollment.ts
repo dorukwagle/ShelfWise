@@ -1,6 +1,7 @@
 import { z } from "zod";
-import enrollmentRequest from "./enrollmentRequest";
+import enrollmentRequest from "./EnrollmentRequest";
 import prismaClient from "../utils/prismaClient";
+import EnrollmentRequest from "./EnrollmentRequest";
 
 
 const membershipTypeExists = async (membershipTypeId: string) => {
@@ -13,7 +14,7 @@ const membershipTypeExists = async (membershipTypeId: string) => {
     return !!membership;
 }
 
-const enrollment = enrollmentRequest.extend({
+const Enrollment = enrollmentRequest.extend({
     accountStatus: z.enum(["Pending", "Active", "Inactive", "Rejected", "Suspended"],
         {required_error: "Account Status is required"}),
     startDate: z.string({required_error: "Membership Start Date is required"}).date(),
@@ -22,4 +23,6 @@ const enrollment = enrollmentRequest.extend({
         .refine(membershipTypeExists, "Membership Type doesn't exist"),
 });
 
-export default enrollment;
+export type EnrollmentType = z.infer<typeof EnrollmentRequest>;
+
+export default Enrollment;
