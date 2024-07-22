@@ -13,7 +13,7 @@ const initializeRoutes = (app: Express): void => {
     app.use("/api/attributes", attributes);
     app.use("/api/me", authorize, me);
     app.use("/api/auth", auth);
-    app.use("/api/enrollment", enrollment);
+    app.use("/api/enrollments", enrollment);
 }
 
 export default initializeRoutes;

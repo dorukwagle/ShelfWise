@@ -16,4 +16,22 @@ const createEnrollmentRequest = async (validatedData: EnrollmentRequestType) => 
     });
 }
 
-export default createEnrollmentRequest;
+const getEnrollments = async (emailFilter: string = '') => {
+    const emailSelect = {}
+  return prismaClient.users.findMany({
+      where: {
+          accountStatus: "Pending",
+          email: emailFilter ? ({
+              contains: emailFilter
+          }) : undefined
+      },
+      orderBy: {
+          createdAt: "asc"
+      }
+  });
+};
+
+export {
+    createEnrollmentRequest,
+    getEnrollments,
+};
