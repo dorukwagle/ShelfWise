@@ -21,6 +21,41 @@ describe("enrollments testings", async () => {
         "password": "password"
     };
 
+    const createSessionAndEnrollment = () => {
+        const before = async () => {
+            const expires = new Date();
+            expires.setDate(expires.getDate() + 1);
+
+            const session = await prismaClient.sessions.create({
+                data: {
+                    session: v7(),
+                    role: "Manager",
+                    rolePrecedence: UserRoles.Manager,
+                    expiresAt: expires,
+                    userId: Entities.user.userId
+                }
+            });
+
+            const enrollment = await prismaClient.users.create({
+                data: {
+                    ...invalidEnrollmentsRequest,
+                    dob: new Date().toISOString(),
+                    roleId: Entities.userRoles.roleId,
+                    gender: "Male"
+                }
+            });
+
+            return {session, enrollment};
+        };
+
+        const after = async () => {
+            await prismaClient.sessions.deleteMany();
+            await prismaClient.users.deleteMany();
+        };
+
+        return {before, after};
+    };
+
     beforeEach(async () => {
         await initialSetup();
     });
@@ -36,44 +71,25 @@ describe("enrollments testings", async () => {
         let enrollment: Users;
 
         beforeEach(async () => {
-            const expires = new Date();
-            expires.setDate(expires.getDate() + 1);
-
-             session = await prismaClient.sessions.create({
-                data: {
-                    session: v7(),
-                    role: "Manager",
-                    rolePrecedence: UserRoles.Manager,
-                    expiresAt: expires,
-                    userId: Entities.user.userId
-                }
-            });
-
-             enrollment = await prismaClient.users.create({
-                 data: {
-                     ...invalidEnrollmentsRequest,
-                     dob: new Date().toISOString(),
-                     roleId: Entities.userRoles.roleId,
-                     gender: "Male"
-                 }
-             });
+            const sessionEnrollment = await createSessionAndEnrollment().before();
+            session = sessionEnrollment.session;
+            enrollment = sessionEnrollment.enrollment;
         });
 
         afterEach(async () => {
-           await prismaClient.sessions.deleteMany();
-           await prismaClient.users.deleteMany();
+            await createSessionAndEnrollment().after();
         });
 
         it("should return 403 status if user don't have permission", async () => {
-           await prismaClient.sessions.update({
-               where: {
-                   sessionId: session.sessionId,
-               },
-               data: {
-                   ...session,
-                   rolePrecedence: UserRoles.Member,
-               }
-           });
+            await prismaClient.sessions.update({
+                where: {
+                    sessionId: session.sessionId
+                },
+                data: {
+                    ...session,
+                    rolePrecedence: UserRoles.Member
+                }
+            });
 
             const res = await executeSafely(() => req.setCookie("sessionId", session.session).get());
 
@@ -197,23 +213,143 @@ describe("enrollments testings", async () => {
         });
     });
 
-    // describe("/api/enrollments/approve/:id", async () => {
-    //     const  req = new FetchRequest(`http://localhost:${port}/api/enrollments/approve`)
-    //         .setDefaultHeaders();
-    //
-    //     it("should return 400 if user details is not given", async () => {
-    //
-    //     });
-    //
-    //     it("should return 400 if membership details is not given", () => {
-    //
-    //     });
-    //
-    //     // should return 400 if invalid membership type id is given
-    //     // should return 201 if valid request is sent
-    //     // should activate the user account
-    //     // should assign the newly created membership
-    // });
+    describe("/api/enrollments/approve/:id", async () => {
+        const req = new FetchRequest(`http://localhost:${port}/api/enrollments/approve`)
+            .setDefaultHeaders();
+        let session: Sessions;
+        let enrollment: Users;
+        let enrollmentInvalidData: any = {};
+
+        beforeEach(async () => {
+            const sessionEnrollment = await createSessionAndEnrollment().before();
+            session = sessionEnrollment.session;
+            enrollment = sessionEnrollment.enrollment;
+
+            enrollmentInvalidData = {
+                ...enrollment,
+                "startDate": "2022-11-14",
+                "expiryDate": "2023-11-14",
+                "accountStatus": "Active",
+                "membershipTypeId": v7()
+            };
+        });
+
+        afterEach(async () => {
+            await createSessionAndEnrollment().after();
+        });
+
+        it("should return 404 if the given enrollment id is not found", async () => {
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post(enrollment.userId + "sdf"));
+
+            expect.soft(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(data).toHaveProperty("error");
+        });
+
+        it("should return 400 if user details is not given", async () => {
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post(enrollment.userId));
+
+            expect.soft(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(res!.status).toBe(400);
+            expect.soft(data).toHaveProperty("fullName");
+        });
+
+        it("should return 400 if membership details is not given", async () => {
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post(enrollment.userId, {
+                        ...enrollment
+                    }));
+
+            expect.soft(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(res!.status).toBe(400);
+            expect.soft(data).not.toHaveProperty("fullName");
+            expect.soft(data).toHaveProperty("startDate");
+        });
+
+        it("should return 400 if invalid membership id is given", async () => {
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post(enrollment.userId, enrollmentInvalidData));
+
+            expect.soft(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(res!.status).toBe(400);
+            expect.soft(data).toHaveProperty("membershipTypeId");
+            expect.soft(data.membershipTypeId[0]).toContain("doesn't");
+        });
+
+        it("should return 200 if valid data is given", async () => {
+            enrollmentInvalidData.membershipTypeId = Entities.membershipType.membershipTypeId;
+            enrollmentInvalidData.email = enrollment.email;
+
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post(enrollment.userId, enrollmentInvalidData));
+
+            expect.soft(res).toBeTruthy();
+            expect.soft(res!.status).toBe(200);
+        });
+
+        it("should create the new membership and assign it to the new user", async () => {
+            enrollmentInvalidData.membershipTypeId = Entities.membershipType.membershipTypeId;
+            enrollmentInvalidData.email = enrollment.email;
+
+            // empty the membership database
+            await prismaClient.memberships.deleteMany();
+
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post(enrollment.userId, enrollmentInvalidData));
+
+            const database = await prismaClient.memberships.findMany();
+
+            expect.soft(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(database?.length).toBeTruthy();
+
+            expect.soft(database[0]).toMatchObject({
+                startDate: new Date(enrollmentInvalidData.startDate),
+                expiryDate: new Date(enrollmentInvalidData.expiryDate),
+            });
+
+            expect.soft(data.membership.membershipId).toBe(database[0].membershipId);
+        });
+
+        it("should update or change the enrollment info if given different value", async () => {
+            enrollmentInvalidData.membershipTypeId = Entities.membershipType.membershipTypeId;
+            enrollmentInvalidData.email = "helloemail@gmail.com";
+            enrollmentInvalidData.fullName = "hello name";
+
+
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post(enrollment.userId, enrollmentInvalidData));
+
+            const user = await prismaClient.users.findUnique({
+                where: {
+                    userId: enrollment.userId
+                }
+            });
+
+            expect.soft(res).toBeTruthy();
+            expect.soft(user).toBeTruthy();
+
+            expect.soft(user!.fullName).toBe(enrollmentInvalidData.fullName);
+            expect.soft(user!.email).toBe(enrollmentInvalidData.email);
+        });
+    });
     //
     // describe("/api/enrollments/enroll", async () => {
     //     // should return 400 if invalid user details

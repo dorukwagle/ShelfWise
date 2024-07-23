@@ -3,6 +3,7 @@ import enrollmentRequest from "./EnrollmentRequest";
 import prismaClient from "../utils/prismaClient";
 import EnrollmentRequest from "./EnrollmentRequest";
 
+let currentUserId = "";
 
 const membershipTypeExists = async (membershipTypeId: string) => {
     const membership = await prismaClient.membershipTypes.findUnique({
@@ -14,15 +15,34 @@ const membershipTypeExists = async (membershipTypeId: string) => {
     return !!membership;
 }
 
-const Enrollment = enrollmentRequest.extend({
+const uniqueEmail = async (email: string) => {
+    const user = await prismaClient.users.findFirst({
+        where: {
+            email: email,
+            NOT: {userId: currentUserId}
+        }
+    });
+
+    return !user;
+};
+
+const EnrollmentSchema = enrollmentRequest.omit({email: true}).extend({
     accountStatus: z.enum(["Pending", "Active", "Inactive", "Rejected", "Suspended"],
         {required_error: "Account Status is required"}),
-    startDate: z.string({required_error: "Membership Start Date is required"}).date(),
-    expiryDate: z.string({required_error: "Membership Expiry Date is required"}).date(),
+    startDate: z.coerce.date({required_error: "Membership Start Date is required"}),
+    expiryDate: z.coerce.date({required_error: "Membership Expiry Date is required"}),
     membershipTypeId: z.string({required_error: "Membership Type is required"})
         .refine(membershipTypeExists, "Membership Type doesn't exist"),
+    email: z.string({required_error: "Email is required"})
+        .email()
+        .refine(uniqueEmail, "Email already exists"),
 });
 
-export type EnrollmentType = z.infer<typeof EnrollmentRequest>;
+export type EnrollmentType = Required<z.infer<typeof EnrollmentSchema>>;
+
+const Enrollment = (userId: string) => {
+    currentUserId = userId;
+    return EnrollmentSchema
+};
 
 export default Enrollment;
