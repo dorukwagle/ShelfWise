@@ -5,7 +5,6 @@ import prismaClient from "../../src/utils/prismaClient";
 import {v7} from "uuid";
 import {Sessions, Users} from "@prisma/client";
 import {UserRoles} from "../../src/constants/enum";
-import Enrollment from "../../src/validations/Enrollment";
 
 
 describe("enrollments testings", async () => {
