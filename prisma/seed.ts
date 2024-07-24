@@ -72,7 +72,38 @@ async function main() {
                     }
                 }
             }
-    })
+    });
+
+    const globalAttributes = await prismaClient.globalAttributes.create({
+       data: {
+           issueValidityDays: 7,
+           membershipValidationMonths: 3,
+           penaltyPerDay: 10
+       }
+    });
+
+    const genres = await prismaClient.genres.createMany({
+        data: [
+            { genre: "Thrill" },
+            { genre: "Supernatural" },
+            { genre: "Slice Of Life" },
+            { genre: "Sci-Fi" }
+        ]
+    });
+
+    const authors = await prismaClient.authors.createMany({
+        data: [
+            {title: "Mr", fullName: "Dave Smart"},
+            {title: "Ms", fullName: "Christina Rossetti"}
+        ]
+    });
+
+    const publisher = await prismaClient.publishers.createMany({
+        data: [
+            {publisherName: "Finland Publication", address: "finland"},
+            {publisherName: "Eastern Coast", address: "California"}
+        ]
+    });
 }
 
 main()

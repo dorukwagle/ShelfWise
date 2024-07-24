@@ -67,7 +67,7 @@ describe("enrollments testings", async () => {
         const req = new FetchRequest(`http://localhost:${port}/api/enrollments`)
             .setDefaultHeaders();
         let session: Sessions;
-        let enrollment: Users;
+        let enrollment: Omit<Users, "password">;
 
         beforeEach(async () => {
             const sessionEnrollment = await createSessionAndEnrollment().before();
@@ -216,7 +216,7 @@ describe("enrollments testings", async () => {
         const req = new FetchRequest(`http://localhost:${port}/api/enrollments/approve`)
             .setDefaultHeaders();
         let session: Sessions;
-        let enrollment: Users;
+        let enrollment: Omit<Users, "password">;
         let enrollmentInvalidData: any = {};
 
         beforeEach(async () => {
@@ -354,7 +354,7 @@ describe("enrollments testings", async () => {
         const req = new FetchRequest(`http://localhost:${port}/api/enrollments/enroll`)
             .setDefaultHeaders();
         let session: Sessions;
-        let enrollment: Users;
+        let enrollment: Omit<Users, "password">;
         let enrollmentInvalidData: any = {};
 
         beforeEach(async () => {
@@ -439,9 +439,6 @@ describe("enrollments testings", async () => {
                 },
                 include: {
                     membership: true
-                },
-                omit: {
-                    password: true
                 }
             });
             expect.soft(database).toBeTruthy();

@@ -82,11 +82,14 @@ const getEnrollments = async (emailFilter: string = "") => {
         },
         orderBy: {
             createdAt: "asc"
+        },
+        omit: {
+            password: true
         }
     });
 };
 
-const approveEnrollment = async (userId: string, data: EnrollmentType) => {
+const approveEnrollment = async (userId: string, data: EnrollmentType) =>  {
     const validation = await validateApproveEnrollmentRequest(userId, data);
     if (validation.error) return validation;
 
@@ -150,9 +153,6 @@ const enrollUser = async (data: EnrollmentType) => {
         },
         include: {
             membership: true
-        },
-        omit: {
-            password: true
         }
     });
 

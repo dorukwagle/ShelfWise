@@ -1,8 +1,14 @@
 import prismaClient from "../src/utils/prismaClient";
 import {vi} from "vitest";
 import {hashPassword} from "../src/utils/hash";
-import {Users, UserRoles as UserRolesType, MembershipTypes, Memberships} from "@prisma/client";
-import {Server} from "node:http";
+import {
+    Users,
+    UserRoles as UserRolesType,
+    MembershipTypes,
+    Memberships,
+    GlobalAttributes,
+    Genres, Authors, Publishers
+} from "@prisma/client";
 import {UserRoles} from "../src/constants/enum";
 import {assistantManagerAuth, authorize, coordinatorAuth, managerAuth, memberAuth} from "../src/middlewares/auth";
 import SessionRequest from "../src/entities/sessionRequest";
@@ -10,14 +16,18 @@ import getUserInfo from "../src/utils/userUtils";
 import {startServer, stopServer} from "./singletorServer";
 import app from "../src/app";
 
-vi.stubEnv('NODE_ENV', 'test');
+vi.stubEnv("NODE_ENV", "test");
 
 
 interface IEntities {
-    user: Users
+    user: Omit<Users, "password">
     userRoles: UserRolesType
     membershipType: MembershipTypes
-    membership: Memberships
+    membership: Memberships,
+    globalAttributes: GlobalAttributes,
+    genres: Genres,
+    authors: Authors,
+    publisher: Publishers,
 }
 
 
@@ -26,21 +36,26 @@ export const port = process.env.PORT || 8080;
 
 const executeSafely = async <T>(func: () => T) => {
     try {
-        return  func();
+        return func();
+    } catch (ex: any) {
+        console.log(ex.message);
     }
-    catch (ex: any) {
-        console.log(ex.message)
-    }
-}
+};
 
 const clearUpSetup = async () => {
     await prismaClient.memberships.deleteMany();
     await prismaClient.sessions.deleteMany();
     await prismaClient.users.deleteMany();
     await prismaClient.userRoles.deleteMany();
+
+    await prismaClient.authors.deleteMany();
+    await prismaClient.publishers.deleteMany();
+    await prismaClient.genres.deleteMany();
+    await prismaClient.globalAttributes.deleteMany();
+
     await prismaClient.$disconnect();
     stopServer();
-}
+};
 
 const createAuthorizationTestRoutes = () => {
     app.get("/auth", authorize, async (req: SessionRequest, res) =>
@@ -57,7 +72,7 @@ const createAuthorizationTestRoutes = () => {
 
     app.get("/manager", managerAuth, async (req: SessionRequest, res) =>
         res.status(200).send(await getUserInfo(req.session!.userId)));
-}
+};
 
 const initialSetup = async () => {
     startServer(port);
@@ -104,10 +119,29 @@ const initialSetup = async () => {
         where: {userId: Entities.user.userId}
     }))!;
 
-}
+    Entities.globalAttributes = await prismaClient.globalAttributes.create({
+        data: {
+            issueValidityDays: 7,
+            membershipValidationMonths: 3,
+            penaltyPerDay: 10
+        }
+    });
+
+    Entities.genres = await prismaClient.genres.create({
+        data: {genre: "Supernatural"}
+    })!;
+
+    Entities.authors = await prismaClient.authors.create({
+        data: {title: "Ms", fullName: "Christina Rossetti"}
+    });
+
+    Entities.publisher = await prismaClient.publishers.create({
+        data: {publisherName: "Eastern Coast", address: "California"}
+    });
+};
 
 export {
-    Entities, initialSetup, clearUpSetup, executeSafely, createAuthorizationTestRoutes,
+    Entities, initialSetup, clearUpSetup, executeSafely, createAuthorizationTestRoutes
 
-}
+};
 
