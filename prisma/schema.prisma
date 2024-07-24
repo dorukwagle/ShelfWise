@@ -101,8 +101,6 @@ model Users {
   gender EGender
   roleId String
   role UserRoles @relation(fields: [roleId], references: [roleId])
-  membershipId String?
-  membership Memberships? @relation(fields: [membershipId], references: [membershipId])
   rollNumber String @unique
   email String @unique
   password String
@@ -118,6 +116,7 @@ model Users {
   commentsReplies CommentReplies[]
   ratings Ratings[]
   sessions Sessions[]
+  membership Memberships?
 }
 
 model Memberships {
@@ -129,7 +128,8 @@ model Memberships {
   status EMembershipStatus @default(Active)
   membershipTypeId String
   type MembershipTypes @relation(fields: [membershipTypeId], references: [membershipTypeId])
-  user Users[]
+  userId String @unique
+  user Users @relation(fields: [userId], references: [userId])
 }
 
 model BookRequests {

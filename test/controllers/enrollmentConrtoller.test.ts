@@ -276,7 +276,7 @@ describe("enrollments testings", async () => {
             expect.soft(data).toHaveProperty("startDate");
         });
 
-        it("should return 400 if invalid membership id is given", async () => {
+        it("should return 400 if invalid membership type id is given", async () => {
             const res = await executeSafely(() =>
                 req.setCookie("sessionId", session.session)
                     .post(enrollment.userId, enrollmentInvalidData));
@@ -350,12 +350,93 @@ describe("enrollments testings", async () => {
             expect.soft(user!.email).toBe(enrollmentInvalidData.email);
         });
     });
-    //
-    // describe("/api/enrollments/enroll", async () => {
-    //     // should return 400 if invalid user details
-    //     // should return 400 if invalid membership details
-    //     // should create membership
-    //     // should activate user account
-    //     // should assign membership
-    // });
+
+    describe("/api/enrollments/enroll", async () => {
+        const req = new FetchRequest(`http://localhost:${port}/api/enrollments/enroll`)
+            .setDefaultHeaders();
+        let session: Sessions;
+        let enrollment: Users;
+        let enrollmentInvalidData: any = {};
+
+        beforeEach(async () => {
+            const sessionEnrollment = await createSessionAndEnrollment().before();
+            session = sessionEnrollment.session;
+            enrollment = sessionEnrollment.enrollment;
+
+            enrollmentInvalidData = {
+                ...enrollment,
+                "expiryDate": "2023-11-14",
+                "startDate": "2022-11-14",
+                "accountStatus": "Active",
+                "membershipTypeId": v7()
+            };
+        });
+
+        afterEach(async () => {
+            await createSessionAndEnrollment().after();
+        });
+
+        it("should return validation error if user details is not given", async () => {
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post());
+
+            expect.soft(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(data).toHaveProperty("fullName");
+        });
+
+        it("should return validation error if membership details is not given", async () => {
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post('', {
+                        ...enrollment
+                    }));
+
+            expect.soft(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(data).toHaveProperty("startDate");
+            expect.soft(data).not.toHaveProperty("fullName");
+        });
+
+        it("should return email exists error if duplicate email is given", async () => {
+            enrollmentInvalidData.email = Entities.user.email;
+
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post('', {
+                        ...enrollmentInvalidData
+                    }));
+
+            expect.soft(res).toBeTruthy();
+            const data = await res!.json();
+
+            expect.soft(data).toHaveProperty("email");
+            expect.soft(data.email[0]).toContain("exist");
+        });
+
+        it("should enroll the user, and save in the database if valid input", async () => {
+            const res = await executeSafely(() =>
+                req.setCookie("sessionId", session.session)
+                    .post('', {
+                        ...enrollmentInvalidData
+                    }));
+
+            expect.soft(res).toBeTruthy();
+            const data = await res!.json();
+
+            const database = await prismaClient.users.findUnique({
+                where: {
+                    email: invalidEnrollmentsRequest.email
+                },
+                include: {
+                    membership: true
+                }
+            });
+            expect.soft(database).toBeTruthy();
+            expect.soft(data).toMatchObject(database!);
+        });
+    });
 });

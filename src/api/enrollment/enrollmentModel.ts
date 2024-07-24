@@ -5,20 +5,20 @@ import {Users} from "@prisma/client";
 import Enrollment, {EnrollmentType} from "../../validations/Enrollment";
 
 
-interface ModelReturnTypes<D={}, E={}> {
+interface ModelReturnTypes<D = {}, E = {}> {
     error: E;
     statusCode: number;
     data: D;
 }
 
 
-const invalidResponse = <D={}, E={}>(validation: any) => {
+const invalidResponse = <D = {}, E = {}>(validation: any) => {
     const res = {} as ModelReturnTypes<D, E>;
     res.statusCode = 400;
 
     if (Object.keys(validation.error?.formErrors?.fieldErrors || {}).length)
         res.error = validation.error?.formErrors.fieldErrors;
-    else if(validation.error)
+    else if (validation.error)
         res.error = validation.error;
 
     return res.error ? res : null;
@@ -44,7 +44,7 @@ const validateApproveEnrollmentRequest = async (userId: string, data: Enrollment
 
     res.data = validation.data!;
     return res;
-}
+};
 
 const createEnrollmentRequest = async (data: EnrollmentRequestType) => {
     const res = {} as ModelReturnTypes<Omit<Users, "password">, any>;
@@ -69,28 +69,28 @@ const createEnrollmentRequest = async (data: EnrollmentRequestType) => {
     });
 
     return res;
-}
+};
 
-const getEnrollments = async (emailFilter: string = '') => {
-    const emailSelect = {}
-  return prismaClient.users.findMany({
-      where: {
-          accountStatus: "Pending",
-          email: emailFilter ? ({
-              contains: emailFilter
-          }) : undefined
-      },
-      orderBy: {
-          createdAt: "asc"
-      }
-  });
+const getEnrollments = async (emailFilter: string = "") => {
+    const emailSelect = {};
+    return prismaClient.users.findMany({
+        where: {
+            accountStatus: "Pending",
+            email: emailFilter ? ({
+                contains: emailFilter
+            }) : undefined
+        },
+        orderBy: {
+            createdAt: "asc"
+        }
+    });
 };
 
 const createMembership = async (data: EnrollmentType) => {
     const {
         startDate,
         expiryDate,
-        membershipTypeId,
+        membershipTypeId
     } = data;
 
     return prismaClient.memberships.create({
@@ -100,7 +100,7 @@ const createMembership = async (data: EnrollmentType) => {
             membershipTypeId
         }
     });
-}
+};
 
 const approveEnrollment = async (userId: string, data: EnrollmentType) => {
     const validation = await validateApproveEnrollmentRequest(userId, data);
@@ -125,10 +125,52 @@ const approveEnrollment = async (userId: string, data: EnrollmentType) => {
     });
 
     return {data: user} as ModelReturnTypes<typeof user>;
-}
+};
+
+const enrollUser = async (data: EnrollmentType) => {
+    const validation = await Enrollment("").safeParseAsync(data);
+
+    const response = invalidResponse(validation);
+    if (response) return response;
+
+    const userInfo = await EnrollmentRequest.safeParseAsync(validation.data);
+    const {accountStatus, membershipTypeId} = validation.data!;
+    const membership = await createMembership(validation.data!);
+
+    prismaClient.memberships.create({
+        data: {
+            startDate: new Date(),
+            expiryDate: new Date(),
+            membershipTypeId,
+            user: {
+                create: {
+                    ...userInfo.data!,
+                    accountStatus
+                }
+            }
+        }
+    })
+
+    const user = await prismaClient.users.create({
+        data: {
+            ...userInfo.data!,
+            accountStatus,
+            membershipId:membership.membershipId
+        },
+        include: {
+            membership: true
+        },
+        omit: {
+            password: true
+        }
+    });
+
+    return {data: user} as ModelReturnTypes<typeof user>;
+};
 
 export {
     createEnrollmentRequest,
     getEnrollments,
-    approveEnrollment
+    approveEnrollment,
+    enrollUser
 };

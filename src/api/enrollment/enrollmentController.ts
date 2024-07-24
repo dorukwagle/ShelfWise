@@ -1,6 +1,6 @@
 import express from "express";
 import {assistantManagerAuth} from "../../middlewares/auth";
-import {approveEnrollment, createEnrollmentRequest, getEnrollments} from "./enrollmentModel";
+import {approveEnrollment, createEnrollmentRequest, enrollUser, getEnrollments} from "./enrollmentModel";
 import SessionRequest from "../../entities/sessionRequest";
 
 
@@ -21,6 +21,13 @@ enrollment.post("/request", async (req, res) => {
 
 enrollment.post("/approve/:userId", assistantManagerAuth, async (req: SessionRequest<{ userId: string }>, res) => {
     const user = await approveEnrollment(req.params.userId, req.body);
+    if (user.error) return res.status(user.statusCode).json(user.error);
+
+    res.json(user.data);
+});
+
+enrollment.post("/enroll", assistantManagerAuth, async (req, res) => {
+    const user = await enrollUser(req.body);
     if (user.error) return res.status(user.statusCode).json(user.error);
 
     res.json(user.data);

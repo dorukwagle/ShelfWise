@@ -51,15 +51,6 @@ async function main() {
         ]
     });
 
-    // seed membership table
-    const managerMembership = await prismaClient.memberships.create({
-        data: {
-            startDate: new Date("2021-01-01"),
-            expiryDate: new Date("2022-01-01"),
-            membershipTypeId: employeeType.membershipTypeId
-        }
-    });
-
     const user = await prismaClient.users.create({
         data: {
                 fullName: "Doruk Wagle",
@@ -73,7 +64,13 @@ async function main() {
                 password: await hashPassword("manager123"),
                 accountStatus: "Active",
                 enrollmentYear: "2021",
-                membershipId: managerMembership.membershipId
+                membership: {
+                    create: {
+                        startDate: new Date("2021-01-01"),
+                        expiryDate: new Date("2022-01-01"),
+                        membershipTypeId: employeeType.membershipTypeId
+                    }
+                }
             }
     })
 }
