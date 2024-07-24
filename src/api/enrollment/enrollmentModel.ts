@@ -86,35 +86,30 @@ const getEnrollments = async (emailFilter: string = "") => {
     });
 };
 
-const createMembership = async (data: EnrollmentType) => {
-    const {
-        startDate,
-        expiryDate,
-        membershipTypeId
-    } = data;
-
-    return prismaClient.memberships.create({
-        data: {
-            startDate,
-            expiryDate,
-            membershipTypeId
-        }
-    });
-};
-
 const approveEnrollment = async (userId: string, data: EnrollmentType) => {
     const validation = await validateApproveEnrollmentRequest(userId, data);
     if (validation.error) return validation;
 
-    const membership = await createMembership(validation.data);
-
     const userInfo = await EnrollmentRequest.safeParseAsync(validation.data);
+    const {
+        accountStatus,
+        startDate,
+        expiryDate,
+        membershipTypeId
+    } = validation.data!;
+
     const user = await prismaClient.users.update({
         where: {userId},
         data: {
             ...userInfo.data!,
-            accountStatus: validation.data.accountStatus,
-            membershipId: membership.membershipId
+            accountStatus: accountStatus,
+            membership: {
+                create: {
+                    startDate,
+                    expiryDate,
+                    membershipTypeId
+                }
+            }
         },
         include: {
             membership: true
@@ -134,28 +129,24 @@ const enrollUser = async (data: EnrollmentType) => {
     if (response) return response;
 
     const userInfo = await EnrollmentRequest.safeParseAsync(validation.data);
-    const {accountStatus, membershipTypeId} = validation.data!;
-    const membership = await createMembership(validation.data!);
-
-    prismaClient.memberships.create({
-        data: {
-            startDate: new Date(),
-            expiryDate: new Date(),
-            membershipTypeId,
-            user: {
-                create: {
-                    ...userInfo.data!,
-                    accountStatus
-                }
-            }
-        }
-    })
+    const {
+        accountStatus,
+        membershipTypeId,
+        startDate,
+        expiryDate,
+    } = validation.data!;
 
     const user = await prismaClient.users.create({
         data: {
             ...userInfo.data!,
             accountStatus,
-            membershipId:membership.membershipId
+            membership: {
+                create: {
+                    membershipTypeId,
+                    startDate,
+                    expiryDate
+                }
+            }
         },
         include: {
             membership: true

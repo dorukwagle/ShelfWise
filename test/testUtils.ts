@@ -1,6 +1,5 @@
 import prismaClient from "../src/utils/prismaClient";
 import {vi} from "vitest";
-import app from "../src/app";
 import {hashPassword} from "../src/utils/hash";
 import {Users, UserRoles as UserRolesType, MembershipTypes, Memberships} from "@prisma/client";
 import {Server} from "node:http";
@@ -8,6 +7,8 @@ import {UserRoles} from "../src/constants/enum";
 import {assistantManagerAuth, authorize, coordinatorAuth, managerAuth, memberAuth} from "../src/middlewares/auth";
 import SessionRequest from "../src/entities/sessionRequest";
 import getUserInfo from "../src/utils/userUtils";
+import {startServer, stopServer} from "./singletorServer";
+import app from "../src/app";
 
 vi.stubEnv('NODE_ENV', 'test');
 
@@ -19,11 +20,9 @@ interface IEntities {
     membership: Memberships
 }
 
-let server:Server;
-export const port = process.env.PORT || 3000;
-
 
 const Entities: IEntities = {} as IEntities;
+export const port = process.env.PORT || 8080;
 
 const executeSafely = async <T>(func: () => T) => {
     try {
@@ -35,11 +34,12 @@ const executeSafely = async <T>(func: () => T) => {
 }
 
 const clearUpSetup = async () => {
+    await prismaClient.memberships.deleteMany();
     await prismaClient.sessions.deleteMany();
     await prismaClient.users.deleteMany();
     await prismaClient.userRoles.deleteMany();
     await prismaClient.$disconnect();
-    server.close();
+    stopServer();
 }
 
 const createAuthorizationTestRoutes = () => {
@@ -60,7 +60,7 @@ const createAuthorizationTestRoutes = () => {
 }
 
 const initialSetup = async () => {
-    server = app.listen(port);
+    startServer(port);
     Entities.userRoles = await prismaClient.userRoles.create(
         {
             data: {
@@ -77,14 +77,6 @@ const initialSetup = async () => {
         }
     });
 
-    Entities.membership = await prismaClient.memberships.create({
-        data: {
-            startDate: new Date("2021-01-01"),
-            expiryDate: new Date("2022-01-01"),
-            membershipTypeId: Entities.membershipType.membershipTypeId
-        }
-    });
-
     Entities.user = await prismaClient.users.create({
         data: {
             fullName: "Doruk Wagle",
@@ -98,12 +90,24 @@ const initialSetup = async () => {
             password: await hashPassword("manager123"),
             accountStatus: "Active",
             enrollmentYear: "2021",
-            membershipId: Entities.membership.membershipId
+            membership: {
+                create: {
+                    startDate: new Date("2021-01-01"),
+                    expiryDate: new Date("2022-01-01"),
+                    membershipTypeId: Entities.membershipType.membershipTypeId
+                }
+            }
         }
     });
+
+    Entities.membership = (await prismaClient.memberships.findUnique({
+        where: {userId: Entities.user.userId}
+    }))!;
+
 }
 
 export {
-    Entities, initialSetup, clearUpSetup, executeSafely, createAuthorizationTestRoutes
+    Entities, initialSetup, clearUpSetup, executeSafely, createAuthorizationTestRoutes,
+
 }
 

@@ -1,4 +1,4 @@
-import {afterAll, afterEach, beforeAll, beforeEach, describe, expect, it} from "vitest";
+import {afterEach, beforeEach, describe, expect, it} from "vitest";
 import FetchRequest from "../FetchRequest";
 import {clearUpSetup, Entities, executeSafely, initialSetup, port} from "../testUtils";
 import prismaClient from "../../src/utils/prismaClient";
@@ -49,8 +49,7 @@ describe("enrollments testings", async () => {
         };
 
         const after = async () => {
-            await prismaClient.sessions.deleteMany();
-            await prismaClient.users.deleteMany();
+            await clearUpSetup();
         };
 
         return {before, after};
@@ -418,10 +417,17 @@ describe("enrollments testings", async () => {
         });
 
         it("should enroll the user, and save in the database if valid input", async () => {
+            await prismaClient.users.delete({
+                where: {
+                    email: enrollmentInvalidData.email
+                }
+            });
+
             const res = await executeSafely(() =>
                 req.setCookie("sessionId", session.session)
                     .post('', {
-                        ...enrollmentInvalidData
+                        ...enrollmentInvalidData,
+                        membershipTypeId: Entities.membershipType.membershipTypeId
                     }));
 
             expect.soft(res).toBeTruthy();
@@ -429,14 +435,17 @@ describe("enrollments testings", async () => {
 
             const database = await prismaClient.users.findUnique({
                 where: {
-                    email: invalidEnrollmentsRequest.email
+                    email: enrollmentInvalidData.email
                 },
                 include: {
                     membership: true
+                },
+                omit: {
+                    password: true
                 }
             });
             expect.soft(database).toBeTruthy();
-            expect.soft(data).toMatchObject(database!);
+            expect.soft(data).toMatchObject(JSON.parse(JSON.stringify(database!)));
         });
     });
 });
