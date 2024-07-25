@@ -7,14 +7,15 @@ import {
     MembershipTypes,
     Memberships,
     GlobalAttributes,
-    Genres, Authors, Publishers
+    Genres, Authors, Publishers, Sessions
 } from "@prisma/client";
 import {UserRoles} from "../src/constants/enum";
 import {assistantManagerAuth, authorize, coordinatorAuth, managerAuth, memberAuth} from "../src/middlewares/auth";
-import SessionRequest from "../src/entities/sessionRequest";
+import SessionRequest from "../src/entities/SessionRequest";
 import getUserInfo from "../src/utils/userUtils";
 import {startServer, stopServer} from "./singletorServer";
 import app from "../src/app";
+import {v7} from "uuid";
 
 vi.stubEnv("NODE_ENV", "test");
 
@@ -28,6 +29,7 @@ interface IEntities {
     genres: Genres,
     authors: Authors,
     publisher: Publishers,
+    session: Sessions
 }
 
 
@@ -138,10 +140,21 @@ const initialSetup = async () => {
     Entities.publisher = await prismaClient.publishers.create({
         data: {publisherName: "Eastern Coast", address: "California"}
     });
+
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 1);
+    Entities.session = await prismaClient.sessions.create({
+        data: {
+            session: v7(),
+            role: "Manager",
+            rolePrecedence: UserRoles.Manager,
+            expiresAt: expires,
+            userId: Entities.user.userId
+        }
+    });
 };
 
 export {
     Entities, initialSetup, clearUpSetup, executeSafely, createAuthorizationTestRoutes
-
 };
 

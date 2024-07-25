@@ -3,13 +3,7 @@ import EnrollmentRequest, {EnrollmentRequestType} from "../../validations/Enroll
 import {hashPassword} from "../../utils/hash";
 import {Users} from "@prisma/client";
 import Enrollment, {EnrollmentType} from "../../validations/Enrollment";
-
-
-interface ModelReturnTypes<D = {}, E = {}> {
-    error: E;
-    statusCode: number;
-    data: D;
-}
+import ModelReturnTypes from "../../entities/ModelReturnTypes";
 
 
 const invalidResponse = <D = {}, E = {}>(validation: any) => {

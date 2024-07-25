@@ -1,7 +1,7 @@
 import express from "express";
 import {assistantManagerAuth} from "../../middlewares/auth";
 import {approveEnrollment, createEnrollmentRequest, enrollUser, getEnrollments} from "./enrollmentModel";
-import SessionRequest from "../../entities/sessionRequest";
+import SessionRequest from "../../entities/SessionRequest";
 
 
 const enrollment = express.Router();

@@ -1,4 +1,5 @@
 import {NextFunction} from "express";
+import {FilterParamsType} from "../src/validations/FilterParams";
 
 interface Options {
     headers: Headers;
@@ -53,9 +54,15 @@ class FetchRequest {
         return fetch(`${this.getRoute()}/${params}`, this.options as RequestInit);
     }
 
-    get = async (params: string = '') => {
+    get = async (params: string = '', query?: FilterParamsType) => {
         this.options.method = "GET";
-        return fetch(`${this.getRoute()}/${params}`, this.options as RequestInit);
+        let queryParams:any = {};
+        if (query?.page) queryParams.page = query.page;
+        if (query?.pageSize) queryParams.pageSize = query.pageSize;
+        if (query?.id) queryParams.id = query.id;
+        if (query?.seed) queryParams.seed = query.seed;
+
+        return fetch(`${this.getRoute()}/${params}${new URLSearchParams(queryParams)}`, this.options as RequestInit);
     }
 
     put = async (params: string = '', data?: any) => {

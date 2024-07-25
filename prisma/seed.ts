@@ -51,7 +51,7 @@ async function main() {
         ]
     });
 
-    const user = await prismaClient.users.create({
+    await prismaClient.users.create({
         data: {
                 fullName: "Doruk Wagle",
                 email: "doruk.wagle@gmail.com",
@@ -74,7 +74,7 @@ async function main() {
             }
     });
 
-    const globalAttributes = await prismaClient.globalAttributes.create({
+    await prismaClient.globalAttributes.create({
        data: {
            issueValidityDays: 7,
            membershipValidationMonths: 3,
@@ -82,7 +82,7 @@ async function main() {
        }
     });
 
-    const genres = await prismaClient.genres.createMany({
+    await prismaClient.genres.createMany({
         data: [
             { genre: "Thrill" },
             { genre: "Supernatural" },
@@ -91,7 +91,7 @@ async function main() {
         ]
     });
 
-    const authors = await prismaClient.authors.createMany({
+    await prismaClient.authors.createMany({
         data: [
             {title: "Mr", fullName: "Dave Smart"},
             {title: "Ms", fullName: "Christina Rossetti"}

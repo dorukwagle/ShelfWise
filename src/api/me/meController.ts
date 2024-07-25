@@ -1,7 +1,7 @@
 import router from "express";
 import express from "express";
 import {getMyInfo} from "./meModel";
-import SessionRequest from "../../entities/sessionRequest";
+import SessionRequest from "../../entities/SessionRequest";
 
 const me = express.Router();
 

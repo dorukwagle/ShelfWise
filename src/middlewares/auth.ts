@@ -1,5 +1,5 @@
 import {Request, Response, NextFunction} from "express";
-import SessionRequest from "../entities/sessionRequest";
+import SessionRequest from "../entities/SessionRequest";
 import {UserRoles} from "../constants/enum";
 import prismaClient from "../utils/prismaClient";
 
