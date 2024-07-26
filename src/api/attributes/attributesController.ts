@@ -17,8 +17,8 @@ attributes.get("/membership_types", async (req, res) => {
 });
 
 attributes.get("/genres", async (req: Request<any, any, any, FilterParamsType>, res) => {
-    const {statusCode, data, error} = await getGenres(req.query);
-    res.status(statusCode).json(error ? error : data);
+    const {statusCode, data, error, info} = await getGenres(req.query);
+    res.status(statusCode).json(error ? error : {data, info});
 });
 
 export default attributes;

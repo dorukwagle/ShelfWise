@@ -3,10 +3,10 @@ import {z} from "zod";
 const FilterParams = z.object({
     id: z.string().optional(),
     seed: z.string().optional(),
-    page: z.number()
+    page: z.coerce.number()
         .min(1)
         .optional(),
-    pageSize: z.number()
+    pageSize: z.coerce.number()
         .min(3)
         .optional()
 });

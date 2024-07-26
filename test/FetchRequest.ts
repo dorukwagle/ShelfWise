@@ -61,7 +61,6 @@ class FetchRequest {
         if (query?.pageSize) queryParams.pageSize = query.pageSize;
         if (query?.id) queryParams.id = query.id;
         if (query?.seed) queryParams.seed = query.seed;
-
         return fetch(`${this.getRoute()}/${params}${new URLSearchParams(queryParams)}`, this.options as RequestInit);
     }
 

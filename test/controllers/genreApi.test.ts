@@ -4,10 +4,12 @@ import prismaClient from "../../src/utils/prismaClient";
 import FetchRequest from "../FetchRequest";
 import {FilterParamsType} from "../../src/validations/FilterParams";
 import {v7} from "uuid";
+import {DEFAULT_PAGE_SIZE} from "../../src/constants/constants";
+import exp from "node:constants";
 
 
 describe("Genres", async () => {
-
+    const totalGenres = 33;
     beforeEach(async () => {
        await initialSetup();
     });
@@ -22,20 +24,12 @@ describe("Genres", async () => {
         let genreParams: FilterParamsType;
 
         beforeEach(async () => {
+            await prismaClient.genres.deleteMany();
+            const data = [];
+            for (let i = 1; i <= totalGenres; i++)
+                data.push({genre: `test${i}`})
             await prismaClient.genres.createMany({
-                data: [
-                    {genre: "test1"},
-                    {genre: "test2"},
-                    {genre: "test3"},
-                    {genre: "test4"},
-                    {genre: "test5"},
-                    {genre: "test6"},
-                    {genre: "test7"},
-                    {genre: "test8"},
-                    {genre: "test9"},
-                    {genre: "test10"},
-                    {genre: "test11"},
-                ]
+                data
             });
             genreParams = {};
         });
@@ -52,8 +46,8 @@ describe("Genres", async () => {
 
             expect.soft(res!.status).toBe(400);
 
-            const data = await res!.json();
-            expect.soft(data.error).toContain("not found");
+            const {error} = await res!.json();
+            expect.soft(error).toContain("not found");
         });
 
         it("should return the genre if the genre id is given", async () => {
@@ -66,26 +60,85 @@ describe("Genres", async () => {
             genreParams.id = genre.genreId;
 
             const res = await executeSafely(() => req.get("?", genreParams));
-            const data = await res!.json();
+            const {data} = await res!.json();
 
             expect.soft(res!.status).toBe(200);
             expect.soft(data).toMatchObject(JSON.parse(JSON.stringify(genre)));
         });
 
-        it.skip("should return the default pagination contents if no pagination filters are given", async () => {
-            const res = await executeSafely(() => req.get("?", genreParams));
-            const query = await prismaClient.genres.findMany();
+        it("should return the default pagination contents if no pagination filters are given", async () => {
+            const res = await executeSafely(() => req.get("?"));
 
-            expect.soft(query).toBeTruthy();
             expect.soft(res!.status).toBe(200);
 
-            const data = await res!.json();
-            expect(data.length).toBe(query.length);
+            const {data} = await res!.json();
+            expect.soft(data[0].genre).toBe("test1");
+            expect.soft(data[data.length - 1].genre).toBe("test9"); // 9 items default size
         });
-        // should return the given page with default size if page no. given
-        // should return given page and size if size and page are given
-        // should return hasNextPage and itemsCount as per pagination
+
+        it("should return the given page with default size if page is given", async () => {
+            genreParams.page = 2;
+
+            const res = await executeSafely(() => req.get("?", genreParams));
+
+            expect.soft(res!.status).toBe(200);
+
+            const {data} = await res!.json();
+            expect.soft(data.length).toBe(DEFAULT_PAGE_SIZE);
+            expect.soft(data[0].genre).toBe("test10");
+        });
+
+        it("should return given page of given size if size and page are given", async () => {
+            genreParams.page = 3;
+            genreParams.pageSize = 7;
+
+            const res = await executeSafely(() => req.get("?", genreParams));
+
+            expect.soft(res!.status).toBe(200);
+
+            const {data} = await res!.json();
+            expect.soft(data.length).toBe(genreParams.pageSize);
+            // 1-7, 8-14, 15-22 // 7 items per page, requested 3rd page
+            expect.soft(data[0].genre).toBe("test15");
+            expect.soft(data[data.length - 1].genre).toBe("test21");
+        });
+
+        it("should return hasNextPage and itemsCount as per pagination", async () => {
+            genreParams.page = 3;
+            genreParams.pageSize = 7;
+            const res1 = await executeSafely(() => req.get("?", genreParams));
+
+            genreParams.page = 4;
+            genreParams.pageSize = 10;
+            const res2 = await executeSafely(() => req.get("?", genreParams));
+
+            expect.soft(res1!.status).toBe(200);
+            expect.soft(res2!.status).toBe(200);
+
+            const data1 = await res1!.json();
+            const data2 = await res2!.json();
+
+            expect.soft(data1.info.hasNextPage).toBeTruthy();
+            expect.soft(data2.info.hasNextPage).toBeFalsy();
+            expect.soft(data1.info.itemsCount).toBe(totalGenres);
+            expect.soft(data2.info.itemsCount).toBe(totalGenres);
+
+            expect.soft(data2.data[data2.data.length - 1].genre).toBe("test33");
+            expect.soft(data2.data.length).toBe(totalGenres - ((genreParams.page - 1) * genreParams.pageSize));
+        });
+
         // should return default page size with matching items if seed is given
+        it("should return default page sized with the matching items if seed is given", async () => {
+            genreParams.seed = "21";
+            const res = await executeSafely(() => req.get("?", genreParams));
+
+            expect.soft(res!.status).toBe(200);
+
+            const {data} = await res!.json();
+
+            expect.soft(data[0].genre).toContain(genreParams.seed);
+
+        });
     });
 
     // describe("POST /api/attributes/genres", async () => {
