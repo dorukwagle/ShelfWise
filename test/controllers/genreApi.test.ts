@@ -140,17 +140,25 @@ describe("Genres", async () => {
 
         });
 
-    });
+        it("should add new genre and save in database if post request is sent", async () => {
+            const genre = "damn good";
 
-    // describe("POST /api/attributes/genres", async () => {
-    //     // create new genre if valid data given
-    // });
-    //
-    // describe("PUT /api/attributes/genres/:genreId", async () => {
-    //     // update the given genre
-    // });
-    //
-    // describe("DELETE /api/attributes/genres/:genreId", async () => {
-    //     // delete the given genre
-    // })
+            const res = await executeSafely(() => req.post("?", {
+                genre
+            }));
+
+            expect.soft(res!.status).toBe(200);
+            const data = await prismaClient.genres.findFirst({
+                where: {
+                    genre
+                }
+            });
+
+            expect.soft(data).toBeTruthy();
+        });
+
+        // it should delete genre if delete request is sent
+        // it should not return deleted genre in genre requests
+
+    });
 });

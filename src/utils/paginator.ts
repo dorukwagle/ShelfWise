@@ -3,10 +3,10 @@ import PaginationReturnTypes from "../entities/PaginationReturnTypes";
 import {DEFAULT_PAGE_SIZE} from "../constants/constants";
 import prismaClient from "./prismaClient";
 
-type model = "genres" | "publishers";
+type model = "genres" | "publishers" | "authors";
 type fields = {
-    id: "genreId" | "userId";
-    text: "genre" | "publisherName";
+    id: "genreId" | "userId" | "authorId";
+    text: "genre" | "publisherName" | "fullName";
 }
 
 interface Args {
@@ -71,6 +71,8 @@ const getPaginatedItems = async (model: model, fields: fields, filterParams: Fil
 
     if (!seed && !id)
         return await paginateItems(page, pageSize, args);
+
+    return res;
 }
 
 export {
