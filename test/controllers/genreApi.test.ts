@@ -38,16 +38,16 @@ describe("Genres", async () => {
             await prismaClient.genres.deleteMany();
         });
 
-        it("should return error if invalid genre id is given", async () => {
+        it("should return empty array if invalid genre id is given", async () => {
             genreParams.id = v7();
             const res = await executeSafely(() => req.get("?", genreParams));
 
             expect.soft(res).toBeTruthy();
 
-            expect.soft(res!.status).toBe(400);
+            expect.soft(res!.status).toBe(200);
 
-            const {error} = await res!.json();
-            expect.soft(error).toContain("not found");
+            const {data} = await res!.json();
+            expect.soft(data).toMatchObject([]);
         });
 
         it("should return the genre if the genre id is given", async () => {
@@ -139,6 +139,7 @@ describe("Genres", async () => {
             expect.soft(data[0].genre).toContain(genreParams.seed);
 
         });
+
     });
 
     // describe("POST /api/attributes/genres", async () => {

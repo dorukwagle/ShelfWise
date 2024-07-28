@@ -220,7 +220,7 @@ model Authors {
   updatedAt DateTime @updatedAt @db.Timestamp(3)
   deletedAt DateTime?
 
-  @@fulltext([fullName])
+  @@index([fullName])
 }
 
 model BookWithAuthors {
@@ -242,7 +242,7 @@ model Publishers {
   deletedAt DateTime?
   bookInfo BookInfo[]
 
-  @@fulltext([publisherName])
+  @@index([publisherName])
 }
 
 model isbns {
@@ -262,7 +262,7 @@ model Genres {
   deletedAt DateTime?
   bookGenres BookWithGenres[]
 
-  @@fulltext([genre])
+  @@index([genre])
 }
 
 model BookWithGenres {
