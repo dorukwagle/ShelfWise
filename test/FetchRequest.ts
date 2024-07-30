@@ -27,6 +27,11 @@ class FetchRequest {
         return this;
     }
 
+    reset = () => {
+        this.options.body = null as any;
+        return this;
+    }
+
     setCookie = (name: string, value: string) => {
         this.options.headers.set('Cookie', `${name}=${value}`);
         return this;

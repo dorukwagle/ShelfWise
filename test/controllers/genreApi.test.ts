@@ -6,6 +6,7 @@ import {FilterParamsType} from "../../src/validations/FilterParams";
 import {v7} from "uuid";
 import {DEFAULT_PAGE_SIZE} from "../../src/constants/constants";
 import exp from "node:constants";
+import {PrismaClient} from "@prisma/client";
 
 
 describe("Genres", async () => {
@@ -127,7 +128,6 @@ describe("Genres", async () => {
             expect.soft(data2.data.length).toBe(totalGenres - ((genreParams.page - 1) * genreParams.pageSize));
         });
 
-        // should return default page size with matching items if seed is given
         it("should return default page sized with the matching items if seed is given", async () => {
             genreParams.seed = "21";
             const res = await executeSafely(() => req.get("?", genreParams));
@@ -157,8 +157,31 @@ describe("Genres", async () => {
             expect.soft(data).toBeTruthy();
         });
 
-        // it should delete genre if delete request is sent
-        // it should not return deleted genre in genre requests
+        it("should delete genre if delete request is sent", async () => {
+            const genre = await prismaClient.genres.findFirst();
+            const res = await executeSafely(() => req.delete(genre!.genreId));
 
+            expect.soft(res!.status).toBe(200);
+            const testData = await (new PrismaClient()).genres.findUnique({
+                where: {genreId: genre!.genreId}
+            });
+            expect.soft(testData!.deletedAt).toBeTruthy();
+        });
+
+        it("should not return deleted genre get request is sent", async () => {
+            const genre = await prismaClient.genres.create({
+                data: {
+                    genre: "hello test",
+                    deletedAt: new Date(),
+                }
+            });
+
+            genreParams.id = genre.genreId;
+            const res = await executeSafely(() => req.reset().get("?", genreParams));
+            expect.soft(res!.status).toBe(200);
+
+            const {data} = await res!.json();
+            expect.soft(data).toMatchObject([]);
+        });
     });
 });

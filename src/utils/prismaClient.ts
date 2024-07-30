@@ -1,4 +1,4 @@
-import {Prisma, PrismaClient} from "@prisma/client";
+import {PrismaClient} from "@prisma/client";
 
 
 const databaseUrl: {[key: string]: string} = {
@@ -12,19 +12,16 @@ const prismaClientInstance = () => {
         datasourceUrl: databaseUrl[process.env.NODE_ENV || "development"],
     })
         .$extends({
-            // query: {
-            //     $allModels: {
-            //         async delete({model, operation, query, args}) {
-            //             const context = Prisma.getExtensionContext(this);
-            //
-            //         },
-            //         $allOperations({model, operation, query, args}) {
-            //             if (operation != "delete" && operation != "deleteMany")
-            //                 args.where = {...args.where, deletedAt: null};
-            //             return query(args);
-            //         }
-            //     }
-            // }
+            query: {
+                $allModels: {
+                    $allOperations({model, operation, query, args}) {
+                        if (operation.includes("create")) return query(args);
+                        if (!operation.includes("delete")) // @ts-ignore
+                            args.where = {...args.where, deletedAt: null};
+                        return query(args);
+                    }
+                }
+            }
         });
 }
 

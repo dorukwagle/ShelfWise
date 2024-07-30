@@ -107,6 +107,7 @@ model Users {
   accountStatus EAccountStatus @default(Pending)
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
   bookRequests BookRequests[]
   notifications Notifications[]
   penalties Penalties[]
@@ -130,6 +131,7 @@ model Memberships {
   type MembershipTypes @relation(fields: [membershipTypeId], references: [membershipTypeId])
   userId String @unique
   user Users @relation(fields: [userId], references: [userId])
+  deletedAt DateTime?
 }
 
 model BookRequests {
@@ -231,6 +233,7 @@ model BookWithAuthors {
   bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
 }
 
 model Publishers {
@@ -252,6 +255,7 @@ model isbns {
   bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
 }
 
 model Genres {
@@ -273,6 +277,7 @@ model BookWithGenres {
   genre Genres @relation(fields: [genreId], references: [genreId])
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
+  deletedAt DateTime?
 }
 
 model Books {
@@ -409,5 +414,6 @@ model Sessions {
   role EUserRoles
   user Users @relation(fields: [userId], references: [userId])
   createdAt DateTime @default(now()) @db.Timestamp(3)
+  deletedAt DateTime?
   expiresAt DateTime @db.Timestamp(3)
 }

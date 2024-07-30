@@ -67,7 +67,7 @@ const deleteGenre = async (genreId: string) => {
         }
         return res;
     }
-    await prismaClient.genres.update({where: {genreId: genreId}, data: {deletedAt: new Date()}});
+    await prismaClient.genres.update({where: {genreId}, data: {deletedAt: new Date()}});
     return res;
 }
 
