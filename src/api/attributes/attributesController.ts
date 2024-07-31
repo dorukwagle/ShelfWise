@@ -35,7 +35,7 @@ attributes.get("/genres", async (req: Request<any, any, any, FilterParamsType>, 
 
 attributes.post("/genres", async (req, res) => {
     const validation = Genre.safeParse(req.body);
-    if (validation.error?.isEmpty)
+    if (validation.error)
         return res.status(400).json({ error: validation.error!.message });
 
     res.json(await addGenre(validation.data!.genre));
@@ -73,7 +73,7 @@ attributes.post("/publishers", async (req, res) => {
 
 attributes.put("/publishers/:publisherId", async (req, res) => {
     const validation = Publication.safeParse(req.body);
-    if (validation.error?.isEmpty)
+    if (validation.error)
         return res.status(400).json({ error: validation.error!.message });
 
     const {publisherName, address} = validation.data!;
@@ -104,7 +104,7 @@ attributes.post("/authors", async (req, res) => {
 
 attributes.put("/authors/:authorId", async (req, res) => {
     const validation = Author.safeParse(req.body);
-    if (validation.error?.isEmpty)
+    if (validation.error)
         return res.status(400).json({ error: validation.error!.message });
 
     const {title, fullName} = validation.data!;

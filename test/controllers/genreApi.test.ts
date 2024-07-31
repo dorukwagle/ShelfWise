@@ -1,4 +1,4 @@
-import {afterEach, beforeAll, beforeEach, describe, expect, it} from "vitest";
+import {afterEach, beforeEach, describe, expect, it} from "vitest";
 import {clearUpSetup, Entities, executeSafely, initialSetup, port} from "../testUtils";
 import prismaClient from "../../src/utils/prismaClient";
 import FetchRequest from "../FetchRequest";
@@ -154,6 +154,24 @@ describe("Attributes", async () => {
             expect.soft(data).toBeTruthy();
         });
 
+        it("should update the genre in the database if update request is sent", async () => {
+            const updated = {
+                genre: "hello genre"
+            };
+
+            const genre = await prismaClient.genres.create({
+                data: {
+                    genre: "testing genre"
+                }
+            });
+
+            const res = await executeSafely(() => req.put(genre.genreId, updated));
+            const tally = await prismaClient.genres.findUnique({where: {genreId: genre.genreId}});
+
+            expect.soft(res!.status).toBe(200);
+            expect.soft(tally!.genre).toBe(updated.genre);
+        });
+
         it("should delete genre if delete request is sent", async () => {
             const genre = await prismaClient.genres.findFirst();
             const res = await executeSafely(() => req.delete(genre!.genreId));
@@ -243,6 +261,26 @@ describe("Attributes", async () => {
             expect.soft(data).toBeTruthy();
         });
 
+        it("should update the given publisher in the database if valid data is sent", async () => {
+            const updated = {
+                publisherName: "hello publisher",
+                address: "ktm"
+            };
+
+            const publisher = await prismaClient.publishers.create({
+                data: {
+                    publisherName: "testing genre",
+                    address: "testing address"
+                }
+            });
+
+            const res = await executeSafely(() => req.put(publisher.publisherId, updated));
+            const tally = await prismaClient.publishers.findUnique({where: {publisherId: publisher.publisherId}});
+
+            expect.soft(res!.status).toBe(200);
+            expect.soft(tally).toMatchObject(updated);
+        });
+
         it("should delete the publisher if valid id is sent", async () => {
             const publisher = await prismaClient.publishers.findFirst();
             const res = await executeSafely(() => req.delete(publisher!.publisherId));
@@ -314,6 +352,26 @@ describe("Attributes", async () => {
             });
 
             expect.soft(data).toBeTruthy();
+        });
+
+        it("should update the author in the database if update request is sent", async () => {
+            const updated = {
+                fullName: "hello genre",
+                title: "Mr",
+            };
+
+            const author = await prismaClient.authors.create({
+                data: {
+                    fullName: "testing genre",
+                    title: "Mr"
+                }
+            });
+
+            const res = await executeSafely(() => req.put(author.authorId, updated));
+            const tally = await prismaClient.authors.findUnique({where: {authorId: author.authorId}});
+
+            expect.soft(res!.status).toBe(200);
+            expect.soft(tally).toMatchObject(updated);
         });
 
         it("should delete the author if valid id is sent", async () => {
