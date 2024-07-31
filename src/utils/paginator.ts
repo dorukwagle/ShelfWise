@@ -5,7 +5,7 @@ import prismaClient from "./prismaClient";
 
 type model = "genres" | "publishers" | "authors";
 type fields = {
-    id: "genreId" | "userId" | "authorId";
+    id: "genreId" | "userId" | "authorId" | "publisherId";
     text: "genre" | "publisherName" | "fullName";
 }
 

@@ -3,6 +3,17 @@ import {FilterParamsType} from "../../validations/FilterParams";
 import {getPaginatedItems} from "../../utils/paginator";
 import ModelReturnTypes from "../../entities/ModelReturnTypes";
 
+
+const genreExists = async (genreId: string) => {
+    const genre = await prismaClient.genres.findUnique({where: {genreId}});
+    return Boolean(genre);
+}
+
+const publisherExists = async (publisherId: string) => {
+    const publisher = await prismaClient.publishers.findUnique({where: {publisherId}});
+    return Boolean(publisher);
+}
+
 const getRoles = async (detailed: boolean) => {
     const data = await prismaClient.userRoles.findMany();
     if (detailed) return data;
@@ -28,11 +39,6 @@ const addGenre = async (genreName: string) => {
             genre: genreName,
         }
     });
-}
-
-const genreExists = async (genreId: string) => {
-    const genre = await prismaClient.genres.findUnique({where: {genreId}});
-    return Boolean(genre);
 }
 
 const updateGenre = async (genreId: string, genreName: string) => {
@@ -71,6 +77,56 @@ const deleteGenre = async (genreId: string) => {
     return res;
 }
 
+const getPublishers = async (publisherParams: FilterParamsType) => {
+    return getPaginatedItems("publishers", {id: "publisherId", text: "publisherName"}, publisherParams);
+}
+
+const addPublisher = async (publisherName: string, address: string) => {
+    return prismaClient.publishers.create({
+        data: {
+            publisherName: publisherName,
+            address: "",
+        }
+    });
+}
+
+const updatePublisher = async (publisherId: string, publisherName: string) => {
+    const res = {statusCode: 200} as ModelReturnTypes;
+
+    if (!await publisherExists(publisherId)) {
+        res.statusCode = 404;
+        res.error = {
+            message: "publisher not found"
+        }
+        return res;
+    }
+
+    res.data = await prismaClient.publishers.update({
+        where: {
+            publisherId,
+        },
+        data: {
+            publisherName
+        }
+    });
+
+    return res;
+}
+
+const deletePublisher = async (publisherId: string) => {
+    const res = {statusCode: 200} as ModelReturnTypes;
+    if (!await publisherExists(publisherId)) {
+        res.statusCode = 404;
+        res.error = {
+            message: "publisher not found"
+        }
+        return res;
+    }
+    await prismaClient.publishers.update({where: {publisherId}, data: {deletedAt: new Date()}});
+    return res;
+}
+
+
 
 export {
     getRoles,
@@ -78,5 +134,9 @@ export {
     getGenres,
     addGenre,
     updateGenre,
-    deleteGenre
+    deleteGenre,
+    getPublishers,
+    addPublisher,
+    updatePublisher,
+    deletePublisher
 };

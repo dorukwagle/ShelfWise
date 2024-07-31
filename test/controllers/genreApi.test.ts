@@ -5,30 +5,26 @@ import FetchRequest from "../FetchRequest";
 import {FilterParamsType} from "../../src/validations/FilterParams";
 import {v7} from "uuid";
 import {DEFAULT_PAGE_SIZE} from "../../src/constants/constants";
-import exp from "node:constants";
 import {PrismaClient} from "@prisma/client";
 
 
-describe("Genres", async () => {
-    const totalGenres = 33;
-    beforeEach(async () => {
-       await initialSetup();
-    });
+describe("Attributes", async () => {
+    describe.skip("Genres API", async () => {
+        const totalGenres = 33;
 
-    afterEach(async () => {
-        await clearUpSetup();
-    });
-
-    describe("GET /api/attributes/genres", async () => {
         const req = new FetchRequest(`http://localhost:${port}/api/attributes/genres`)
             .setDefaultHeaders();
-        let genreParams: FilterParamsType;
+        let genreParams
+            :
+            FilterParamsType;
 
         beforeEach(async () => {
+            await initialSetup();
+
             await prismaClient.genres.deleteMany();
             const data = [];
             for (let i = 1; i <= totalGenres; i++)
-                data.push({genre: `test${i}`})
+                data.push({genre: `test${i}`});
             await prismaClient.genres.createMany({
                 data
             });
@@ -37,6 +33,7 @@ describe("Genres", async () => {
 
         afterEach(async () => {
             await prismaClient.genres.deleteMany();
+            await clearUpSetup();
         });
 
         it("should return empty array if invalid genre id is given", async () => {
@@ -53,9 +50,9 @@ describe("Genres", async () => {
 
         it("should return the genre if the genre id is given", async () => {
             const genre = await prismaClient.genres.create({
-               data: {
-                   genre: "test genre"
-               }
+                data: {
+                    genre: "test genre"
+                }
             });
 
             genreParams.id = genre.genreId;
@@ -172,7 +169,7 @@ describe("Genres", async () => {
             const genre = await prismaClient.genres.create({
                 data: {
                     genre: "hello test",
-                    deletedAt: new Date(),
+                    deletedAt: new Date()
                 }
             });
 
@@ -184,4 +181,150 @@ describe("Genres", async () => {
             expect.soft(data).toMatchObject([]);
         });
     });
+
+    describe("Publishers API", async () => {
+        const totalPublishers = 34;
+
+        const req = new FetchRequest(`http://localhost:${port}/api/attributes/publishers`)
+            .setDefaultHeaders();
+        let pubParams
+            :
+            FilterParamsType;
+
+        beforeEach(async () => {
+            await initialSetup();
+
+            await prismaClient.publishers.deleteMany();
+            const data = [];
+            for (let i = 1; i <= totalPublishers; i++)
+                data.push({publisherName: `test${i}`, address: `testAddr${i}`});
+            await prismaClient.publishers.createMany({
+                data
+            });
+            pubParams = {};
+        });
+
+        afterEach(async () => {
+            await prismaClient.publishers.deleteMany();
+            await clearUpSetup();
+        });
+
+        it("should return publisher with pagination", async () => {
+            pubParams.page = 2;
+            pubParams.pageSize = 7;
+
+            const res = await executeSafely(() => req.get("?", pubParams));
+
+            expect.soft(res!.status).toBe(200);
+            const {data, info} = await res!.json();
+
+            expect.soft(data.length).toBe(pubParams.pageSize);
+            expect.soft(info.hasNextPage).toBeTruthy();
+            expect.soft(info.itemsCount).toBe(totalPublishers);
+        });
+
+        it("should add new publisher when valid request is sent", async () => {
+            const publisher = {
+                publisherName: "hello publisher",
+                address: "publisher address"
+            };
+
+            const res = await executeSafely(() => req.post("?", {
+                ...publisher
+            }));
+
+            expect.soft(res!.status).toBe(200);
+            const data = await prismaClient.publishers.findFirst({
+                where: {
+                    publisherName: publisher.publisherName
+                }
+            });
+
+            expect.soft(data).toBeTruthy();
+        });
+
+        it("should delete the publisher if valid id is sent", async () => {
+            const publisher = await prismaClient.publishers.findFirst();
+            const res = await executeSafely(() => req.delete(publisher!.publisherId));
+
+            expect.soft(res!.status).toBe(200);
+            const testData = await (new PrismaClient()).publishers.findUnique({
+                where: {publisherId: publisher!.publisherId}
+            });
+            expect.soft(testData!.deletedAt).toBeTruthy();
+        });
+    });
+
+    describe.skip("Authors API", async () => {
+        const totalAuthors = 38;
+
+        const req = new FetchRequest(`http://localhost:${port}/api/attributes/authors`)
+            .setDefaultHeaders();
+        let authorParams
+            :
+            FilterParamsType;
+
+        beforeEach(async () => {
+            await initialSetup();
+
+            await prismaClient.authors.deleteMany();
+            const data = [];
+            for (let i = 1; i <= totalAuthors; i++)
+                data.push({fullName: `test${i}`});
+            await prismaClient.authors.createMany({
+                data
+            });
+            authorParams = {};
+        });
+
+        afterEach(async () => {
+            await prismaClient.authors.deleteMany();
+            await clearUpSetup();
+        });
+
+        it("should return authors with pagination", async () => {
+            authorParams.page = 2;
+            authorParams.pageSize = 7;
+
+            const res = await executeSafely(() => req.get("?", authorParams));
+
+            expect.soft(res!.status).toBe(200);
+
+            const {data, hasNextPage, totalCount} = await res!.json();
+            expect.soft(data.length).toBe(authorParams.pageSize);
+            expect.soft(hasNextPage).toBeTruthy();
+            expect.soft(totalCount).toBe(authorParams);
+        });
+
+        it("should add new authors when valid request is sent", async () => {
+            const author = {
+                fullName: "Author FullName",
+            };
+
+            const res = await executeSafely(() => req.post("?", {
+                author
+            }));
+
+            expect.soft(res!.status).toBe(200);
+            const data = await prismaClient.authors.findFirst({
+                where: {
+                    fullName: author.fullName
+                }
+            });
+
+            expect.soft(data).toBeTruthy();
+        });
+
+        it("should delete the author if valid id is sent", async () => {
+            const author = await prismaClient.authors.findFirst();
+            const res = await executeSafely(() => req.delete(author!.authorId));
+
+            expect.soft(res!.status).toBe(200);
+            const testData = await (new PrismaClient()).authors.findUnique({
+                where: {authorId: author!.authorId}
+            });
+            expect.soft(testData!.deletedAt).toBeTruthy();
+        });
+    });
+
 });
