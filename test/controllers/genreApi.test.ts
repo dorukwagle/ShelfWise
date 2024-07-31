@@ -9,7 +9,7 @@ import {PrismaClient} from "@prisma/client";
 
 
 describe("Attributes", async () => {
-    describe.skip("Genres API", async () => {
+    describe("Genres API", async () => {
         const totalGenres = 33;
 
         const req = new FetchRequest(`http://localhost:${port}/api/attributes/genres`)
@@ -255,7 +255,7 @@ describe("Attributes", async () => {
         });
     });
 
-    describe.skip("Authors API", async () => {
+    describe("Authors API", async () => {
         const totalAuthors = 38;
 
         const req = new FetchRequest(`http://localhost:${port}/api/attributes/authors`)
@@ -290,19 +290,20 @@ describe("Attributes", async () => {
 
             expect.soft(res!.status).toBe(200);
 
-            const {data, hasNextPage, totalCount} = await res!.json();
+            const {data, info:{hasNextPage, itemsCount}} = await res!.json();
             expect.soft(data.length).toBe(authorParams.pageSize);
             expect.soft(hasNextPage).toBeTruthy();
-            expect.soft(totalCount).toBe(authorParams);
+            expect.soft(itemsCount).toBe(totalAuthors);
         });
 
         it("should add new authors when valid request is sent", async () => {
             const author = {
+                title: "Mr",
                 fullName: "Author FullName",
             };
 
             const res = await executeSafely(() => req.post("?", {
-                author
+                ...author
             }));
 
             expect.soft(res!.status).toBe(200);

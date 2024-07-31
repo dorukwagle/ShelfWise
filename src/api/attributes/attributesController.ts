@@ -1,16 +1,18 @@
 import express, {Request} from "express";
 import {
-    addGenre, addPublisher,
-    deleteGenre, deletePublisher,
+    addAuthor,
+    addGenre, addPublisher, deleteAuthor,
+    deleteGenre, deletePublisher, getAuthors,
     getGenres,
     getMembershipTypes,
     getPublishers,
-    getRoles,
+    getRoles, updateAuthor,
     updateGenre, updatePublisher
 } from "./attributesModel";
 import {FilterParamsType} from "../../validations/FilterParams";
 import Genre from "../../validations/Genre";
 import Publication from "../../validations/Publication";
+import Author from "../../validations/Author";
 
 
 const attributes = express.Router();
@@ -74,7 +76,8 @@ attributes.put("/publishers/:publisherId", async (req, res) => {
     if (validation.error?.isEmpty)
         return res.status(400).json({ error: validation.error!.message });
 
-    const response = await updatePublisher(req.params.publisherId, validation.data!.publisherName);
+    const {publisherName, address} = validation.data!;
+    const response = await updatePublisher(req.params.publisherId, publisherName, address);
     res.status(response.statusCode).json(response.data);
 });
 
@@ -84,5 +87,34 @@ attributes.delete("/publishers/:publisherId", async (req, res) => {
 });
 
 // AUTHORS ROUTES
+
+attributes.get("/authors", async (req, res) => {
+   const {statusCode, data, info, error} = await getAuthors(req.query);
+   res.status(statusCode).json(error ? error : {data, info});
+});
+
+attributes.post("/authors", async (req, res) => {
+    const validation = Author.safeParse(req.body);
+    if (validation.error)
+        return res.status(400).json({ error: validation.error!.message });
+
+    const {fullName, title} = validation.data!;
+    res.json(await addAuthor(title, fullName));
+});
+
+attributes.put("/authors/:authorId", async (req, res) => {
+    const validation = Author.safeParse(req.body);
+    if (validation.error?.isEmpty)
+        return res.status(400).json({ error: validation.error!.message });
+
+    const {title, fullName} = validation.data!;
+    const response = await updateAuthor(req.params.authorId, title, fullName);
+    res.status(response.statusCode).json(response.data);
+});
+
+attributes.delete("/authors/:authorId", async (req, res) => {
+    const response = await deleteAuthor(req.params.authorId);
+    res.status(response.statusCode).json(response.data);
+});
 
 export default attributes;
