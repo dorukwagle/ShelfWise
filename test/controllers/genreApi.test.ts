@@ -29,6 +29,8 @@ describe("Attributes", async () => {
                 data
             });
             genreParams = {};
+
+            req.setCookie("sessionId", Entities.session.session)
         });
 
         afterEach(async () => {
@@ -220,6 +222,8 @@ describe("Attributes", async () => {
                 data
             });
             pubParams = {};
+
+            req.setCookie("sessionId", Entities.session.session)
         });
 
         afterEach(async () => {
@@ -313,6 +317,8 @@ describe("Attributes", async () => {
                 data
             });
             authorParams = {};
+
+            req.setCookie("sessionId", Entities.session.session)
         });
 
         afterEach(async () => {
