@@ -80,6 +80,7 @@ model MembershipTypes {
   type EMembershipTypes
   precedence Int
   membership Memberships[]
+  deletedAt DateTime?
 }
 
 model UserRoles {
@@ -87,6 +88,7 @@ model UserRoles {
   role EUserRoles
   precedence Int
   user Users[]
+  deletedAt DateTime?
 }
 
 model Users {

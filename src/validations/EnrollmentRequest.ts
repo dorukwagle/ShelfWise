@@ -1,26 +1,11 @@
 import { z } from "zod";
 import prismaClient from "../utils/prismaClient";
+import {exists, unique} from "../utils/dbValidation";
 
 
-const roleExists = async (roleId: string) => {
-    const role = await prismaClient.userRoles.findUnique({
-        where: {
-            roleId: roleId
-        }
-    });
+const roleExists = async (roleId: string) => exists("userRoles", "roleId", roleId);
 
-    return !!role;
-}
-
-const uniqueEmail = async (email: string) => {
-    const user = await prismaClient.users.findUnique({
-       where: {
-           email: email
-       }
-    });
-
-    return !user;
-};
+const uniqueEmail = async (email: string) => unique("users", "email", email);
 
 const EnrollmentRequest = z.object({
     fullName: z.string({required_error: "Full Name is required"})

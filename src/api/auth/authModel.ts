@@ -22,7 +22,7 @@ const authenticate = async (email: string, password: string): Promise<CustomUser
     return user;
 }
 
-const createSession = async (user: Users): Promise<string> => {
+const createSession = async (user: Omit<Users, "password">): Promise<string> => {
     const userInfo = await getUserInfo(user.userId, false, true);
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + 5); // 5 days validity

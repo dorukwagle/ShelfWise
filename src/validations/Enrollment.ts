@@ -2,18 +2,12 @@ import { z } from "zod";
 import enrollmentRequest from "./EnrollmentRequest";
 import prismaClient from "../utils/prismaClient";
 import EnrollmentRequest from "./EnrollmentRequest";
+import {exists} from "../utils/dbValidation";
 
 let currentUserId = "";
 
-const membershipTypeExists = async (membershipTypeId: string) => {
-    const membership = await prismaClient.membershipTypes.findUnique({
-        where: {
-            membershipTypeId
-        }
-    });
-
-    return !!membership;
-}
+const membershipTypeExists = async (membershipTypeId: string) =>
+    exists("MembershipTypes", "membershipTypeId", membershipTypeId);
 
 const uniqueEmail = async (email: string) => {
     const user = await prismaClient.users.findFirst({
