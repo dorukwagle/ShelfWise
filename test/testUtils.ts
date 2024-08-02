@@ -44,6 +44,15 @@ const executeSafely = async <T>(func: () => T) => {
     }
 };
 
+const clearBooksData = async () => {
+    await prismaClient.books.deleteMany();
+    await prismaClient.isbns.deleteMany();
+    await prismaClient.bookPurchases.deleteMany();
+    await prismaClient.bookWithGenres.deleteMany();
+    await prismaClient.bookWithAuthors.deleteMany();
+    // delete the uploaded file:- book cover photo
+};
+
 const clearUpSetup = async () => {
     await prismaClient.memberships.deleteMany();
     await prismaClient.sessions.deleteMany();
@@ -155,6 +164,7 @@ const initialSetup = async () => {
 };
 
 export {
-    Entities, initialSetup, clearUpSetup, executeSafely, createAuthorizationTestRoutes
+    Entities, initialSetup, clearUpSetup, executeSafely, createAuthorizationTestRoutes,
+    clearBooksData
 };
 

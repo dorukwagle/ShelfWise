@@ -81,7 +81,6 @@ const BookInfo = z.object({
     publicationYear: z.string({required_error: "publicationYear is required"}),
     seriesStatement: z.string().optional(),
     addedDate: z.coerce.date().optional(),
-    coverPhoto: z.string({required_error: "cover photo is required"}),
     publisherId: z.string({required_error: "publisher is required"})
         .refine(publisherExists, "publisher not found"),
     bookAuthors: z.string().array()
