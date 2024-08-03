@@ -1,5 +1,6 @@
-import {NextFunction} from "express";
 import {FilterParamsType} from "../src/validations/FilterParams";
+import {RequestOptions} from "node:http";
+// import fetch, {RequestInit} from "node-fetch";
 
 interface Options {
     headers: Headers;
@@ -53,9 +54,9 @@ class FetchRequest {
         return this;
     }
 
-    post = async (params: string = '', data?: any) => {
+    post = async (params: string = '', data?: any, multipart=false) => {
         this.options.method = "POST";
-        this.options.body = JSON.stringify(data || {});
+        this.options.body = multipart? data : JSON.stringify(data || []);
         return fetch(`${this.getRoute()}/${params}`, this.options as RequestInit);
     }
 
@@ -71,7 +72,7 @@ class FetchRequest {
 
     put = async (params: string = '', data?: any) => {
         this.options.method = "PUT";
-        this.options.body = JSON.stringify(data || []);
+        this.options.body = data || [];
         return fetch(`${this.getRoute()}/${params}`, this.options as RequestInit);
     }
 

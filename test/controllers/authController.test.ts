@@ -76,7 +76,7 @@ describe("AuthController testings...", async () => {
             const data = await res!.json();
 
             expect.soft(res!.status).toBe(200);
-            expect.soft(data).not.toMatchObject({password: Entities.user.password});
+            expect.soft(data).not.toHaveProperty("password");
         });
 
         it("should return sessionId and return it if correct email & password is given", async () => {

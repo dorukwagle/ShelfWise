@@ -58,4 +58,4 @@ const destroyAllSessions = async (session: Sessions) => {
     return true;
 }
 
-export { authenticate, createSession, destroySession};
+export { authenticate, createSession, destroySession, destroyAllSessions};

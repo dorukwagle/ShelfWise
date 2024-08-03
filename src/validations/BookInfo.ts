@@ -1,6 +1,8 @@
 import {z} from "zod";
 import {exists, unique} from "../utils/dbValidation";
 
+const hasDuplicates = (data: any[]) => (new Set(data)).size !== data.length;
+
 // unique array values shouldn't be duplicate in requests too
 const uniqueClassNumber = async (cn: string) => unique("bookInfo", "classNumber", cn);
 
@@ -9,13 +11,10 @@ const uniqueBookNumber = async  (bookNumber: string) => unique("bookInfo", "book
 const publisherExists = async (publisherId: string) => exists("publishers", "publisherId", publisherId);
 
 const eachBookAuthorsExists = async (authorIds: string[]) => {
-    const map = new Map();
+    if (hasDuplicates(authorIds)) return false;
 
     for (const authorId of authorIds) {
-        if (map.has(authorId)) return false;
-        map.set(authorId, 1);
-
-        let exist = await exists("bookInfo", "authorId", authorId);
+        let exist = await exists("authors", "authorId", authorId);
         if (!exist)
             return false;
     }
@@ -24,12 +23,9 @@ const eachBookAuthorsExists = async (authorIds: string[]) => {
 }
 
 const eachUniqueIsbn = async (isbns: string[]) => {
-    const map = new Map();
+    if (hasDuplicates(isbns)) return false;
 
     for (const isbn of isbns) {
-        if (map.has(isbn)) return false;
-        map.set(isbn, 1);
-
         let exist = await exists("isbns", "isbn", isbn);
         if (exist)
             return false;
@@ -39,12 +35,9 @@ const eachUniqueIsbn = async (isbns: string[]) => {
 }
 
 const eachBookGenreExists = async (genreIds: string[]) => {
-    const map = new Map();
+    if (hasDuplicates(genreIds)) return false;
 
     for (const genreId of genreIds) {
-        if (map.has(genreId)) return false;
-        map.set(genreId, 1);
-
         let exist = await exists("genres", "genreId", genreId);
         if (!exist)
             return false;
@@ -54,12 +47,9 @@ const eachBookGenreExists = async (genreIds: string[]) => {
 }
 
 const eachUniqueBarcode = async (barcodes: string[]) => {
-    const map = new Map();
+    if (hasDuplicates(barcodes)) return false;
 
     for (const barcode of barcodes) {
-        if (map.has(barcode)) return false;
-        map.set(barcode, 1);
-
         let exist = await exists("books", "barcode", barcode);
         if (exist)
             return false;
@@ -76,19 +66,19 @@ const BookInfo = z.object({
     title: z.string({required_error: "title is required"}),
     subTitle: z.string().optional(),
     editionStatement: z.string().optional(),
-    numberOfPages: z.number({required_error: "number of pages is required"})
+    numberOfPages: z.coerce.number({required_error: "number of pages is required"})
         .min(1, "can't be less than 1"),
     publicationYear: z.string({required_error: "publicationYear is required"}),
     seriesStatement: z.string().optional(),
     addedDate: z.coerce.date().optional(),
     publisherId: z.string({required_error: "publisher is required"})
         .refine(publisherExists, "publisher not found"),
-    bookAuthors: z.string().array()
-        .refine(eachBookAuthorsExists, "each book author must exist"),
+    bookAuthors: z.coerce.string().array()
+        .refine(eachBookAuthorsExists, "book authors not found or duplicate entry"),
     isbns: z.string().array()
         .refine(eachUniqueIsbn, "each isbn must be unique"),
-    bookGenres: z.string().array()
-        .refine(eachBookGenreExists, "each book genre must exist"),
+    bookGenres: z.coerce.string().array()
+        .refine(eachBookGenreExists, "book genre not found is duplicate entry"),
     pricePerPiece: z.coerce.number().min(0),
     totalPieces: z.coerce.number().min(1),
     barcodes: z.string().array() // length equal to totalPieces

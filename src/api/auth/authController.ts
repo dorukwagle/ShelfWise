@@ -15,7 +15,6 @@ interface Credentials {
 
 auth.post("/login", async (req: express.Request<{}, any, Credentials>, res) => {
     const {email, password} = req.body;
-
     if (!email || !password) return res.status(401).json({error: "email and password required"});
 
     const user = await authenticate(email, password);
