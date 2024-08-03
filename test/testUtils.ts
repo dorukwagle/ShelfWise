@@ -7,7 +7,7 @@ import {
     MembershipTypes,
     Memberships,
     GlobalAttributes,
-    Genres, Authors, Publishers, Sessions
+    Genres, Authors, Publishers, Sessions, PrismaClient
 } from "@prisma/client";
 import {UserRoles} from "../src/constants/enum";
 import {assistantManagerAuth, authorize, coordinatorAuth, managerAuth, memberAuth} from "../src/middlewares/auth";
@@ -35,6 +35,10 @@ interface IEntities {
 
 const Entities: IEntities = {} as IEntities;
 export const port = process.env.PORT || 8080;
+
+export const testPrisma = new PrismaClient({
+    datasourceUrl: process.env.TEST_DATABASE_URL,
+});
 
 const executeSafely = async <T>(func: () => T) => {
     try {

@@ -1,5 +1,5 @@
 import {afterEach, beforeEach, describe, expect, it} from "vitest";
-import {clearUpSetup, Entities, executeSafely, initialSetup, port} from "../testUtils";
+import {clearUpSetup, Entities, executeSafely, initialSetup, port, testPrisma} from "../testUtils";
 import prismaClient from "../../src/utils/prismaClient";
 import FetchRequest from "../FetchRequest";
 import {FilterParamsType} from "../../src/validations/FilterParams";
@@ -179,7 +179,7 @@ describe("Attributes", async () => {
             const res = await executeSafely(() => req.delete(genre!.genreId));
 
             expect.soft(res!.status).toBe(200);
-            const testData = await (new PrismaClient()).genres.findUnique({
+            const testData = await testPrisma.genres.findUnique({
                 where: {genreId: genre!.genreId}
             });
             expect.soft(testData!.deletedAt).toBeTruthy();
@@ -290,7 +290,7 @@ describe("Attributes", async () => {
             const res = await executeSafely(() => req.delete(publisher!.publisherId));
 
             expect.soft(res!.status).toBe(200);
-            const testData = await (new PrismaClient()).publishers.findUnique({
+            const testData = await testPrisma.publishers.findUnique({
                 where: {publisherId: publisher!.publisherId}
             });
             expect.soft(testData!.deletedAt).toBeTruthy();
@@ -385,7 +385,7 @@ describe("Attributes", async () => {
             const res = await executeSafely(() => req.delete(author!.authorId));
 
             expect.soft(res!.status).toBe(200);
-            const testData = await (new PrismaClient()).authors.findUnique({
+            const testData = await testPrisma.authors.findUnique({
                 where: {authorId: author!.authorId}
             });
             expect.soft(testData!.deletedAt).toBeTruthy();

@@ -72,7 +72,7 @@ class FetchRequest {
 
     put = async (params: string = '', data?: any) => {
         this.options.method = "PUT";
-        this.options.body = data || [];
+        this.options.body = JSON.stringify(data || {});
         return fetch(`${this.getRoute()}/${params}`, this.options as RequestInit);
     }
 

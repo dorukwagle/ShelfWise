@@ -49,8 +49,9 @@ attributes.post("/genres", assistantManagerAuth, async (req, res) => {
 attributes.put("/genres/:genreId", assistantManagerAuth,
     async (req: SessionRequest<{ genreId: string }>, res) => {
         const validation = Genre.safeParse(req.body);
-        if ((validation.error))
-            return res.status(400).json({error: validation.error!.message});
+        const err = formatValidationErrors(validation);
+        if (err)
+            return res.status(err.statusCode).json(err.error);
 
         const response = await updateGenre(req.params.genreId, validation.data!.genre);
         res.status(response.statusCode).json(response.data);
@@ -72,8 +73,9 @@ attributes.get("/publishers",
 
 attributes.post("/publishers", assistantManagerAuth, async (req, res) => {
     const validation = Publication.safeParse(req.body);
-    if (validation.error)
-        return res.status(400).json({error: validation.error!.message});
+    const err = formatValidationErrors(validation);
+    if (err)
+        return res.status(err.statusCode).json(err.error);
 
     const {publisherName, address} = validation.data!;
     res.json(await addPublisher(publisherName, address));
@@ -82,8 +84,9 @@ attributes.post("/publishers", assistantManagerAuth, async (req, res) => {
 attributes.put("/publishers/:publisherId", assistantManagerAuth,
     async (req: SessionRequest<{ publisherId: string }>, res) => {
         const validation = Publication.safeParse(req.body);
-        if (validation.error)
-            return res.status(400).json({error: validation.error!.message});
+        const err = formatValidationErrors(validation);
+        if (err)
+            return res.status(err.statusCode).json(err.error);
 
         const {publisherName, address} = validation.data!;
         const response = await updatePublisher(req.params.publisherId, publisherName, address);
@@ -105,8 +108,9 @@ attributes.get("/authors", async (req, res) => {
 
 attributes.post("/authors", assistantManagerAuth, async (req, res) => {
     const validation = Author.safeParse(req.body);
-    if (validation.error)
-        return res.status(400).json({error: validation.error!.message});
+    const err = formatValidationErrors(validation);
+    if (err)
+        return res.status(err.statusCode).json(err.error);
 
     const {fullName, title} = validation.data!;
     res.json(await addAuthor(title, fullName));
@@ -115,8 +119,9 @@ attributes.post("/authors", assistantManagerAuth, async (req, res) => {
 attributes.put("/authors/:authorId", assistantManagerAuth,
     async (req: SessionRequest<{ authorId: string }>, res) => {
         const validation = Author.safeParse(req.body);
-        if (validation.error)
-            return res.status(400).json({error: validation.error!.message});
+        const err = formatValidationErrors(validation);
+        if (err)
+            return res.status(err.statusCode).json(err.error);
 
         const {title, fullName} = validation.data!;
         const response = await updateAuthor(req.params.authorId, title, fullName);
