@@ -6,8 +6,9 @@ export const formatValidationErrors = <D = {}, E = {}>(validation: any) => {
 
     if (Object.keys(validation.error?.formErrors?.fieldErrors || {}).length)
         res.error = validation.error?.formErrors.fieldErrors;
+
     else if (validation.error)
-        res.error = validation.error;
+        res.error = {error: validation.error.issues[0].message} as E;
 
     return res.error ? res : null;
 };

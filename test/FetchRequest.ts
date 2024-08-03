@@ -56,7 +56,7 @@ class FetchRequest {
 
     post = async (params: string = '', data?: any, multipart=false) => {
         this.options.method = "POST";
-        this.options.body = multipart? data : JSON.stringify(data || []);
+        this.options.body = multipart? data : JSON.stringify(data || {});
         return fetch(`${this.getRoute()}/${params}`, this.options as RequestInit);
     }
 

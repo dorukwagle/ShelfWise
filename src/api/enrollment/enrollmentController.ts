@@ -13,24 +13,18 @@ enrollment.get("/", assistantManagerAuth,
     });
 
 enrollment.post("/request", async (req, res) => {
-    const created = await createEnrollmentRequest(req.body);
-    if (created.error) return res.status(created.statusCode).json(created.error);
-
-    res.status(201).json(created.data);
+    const {statusCode, data, error} = await createEnrollmentRequest(req.body);
+    return res.status(statusCode).json(error ? error : data);
 });
 
 enrollment.post("/approve/:userId", assistantManagerAuth, async (req: SessionRequest<{ userId: string }>, res) => {
-    const user = await approveEnrollment(req.params.userId, req.body);
-    if (user.error) return res.status(user.statusCode).json(user.error);
-
-    res.json(user.data);
+    const {statusCode, data, error} = await approveEnrollment(req.params.userId, req.body);
+    return res.status(statusCode).json(error ? error : data);
 });
 
 enrollment.post("/enroll", assistantManagerAuth, async (req, res) => {
-    const user = await enrollUser(req.body);
-    if (user.error) return res.status(user.statusCode).json(user.error);
-
-    res.json(user.data);
+    const {statusCode, data, error} = await enrollUser(req.body);
+    return res.status(statusCode).json(error ? error : data);
 });
 
 export default enrollment;

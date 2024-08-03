@@ -21,7 +21,6 @@ const validateApproveEnrollmentRequest = async (userId: string, data: Enrollment
 
     const validation = await Enrollment(userId).safeParseAsync(data);
     const response = formatValidationErrors<EnrollmentType>(validation);
-
     if (response) return response;
 
     res.data = validation.data!;
@@ -29,7 +28,7 @@ const validateApproveEnrollmentRequest = async (userId: string, data: Enrollment
 };
 
 const createEnrollmentRequest = async (data: EnrollmentRequestType) => {
-    const res = {} as ModelReturnTypes<Omit<Users, "password">, any>;
+    const res = {statusCode: 201} as ModelReturnTypes<Omit<Users, "password">, any>;
 
     const validation =
         await EnrollmentRequest.safeParseAsync(data);
@@ -54,7 +53,6 @@ const createEnrollmentRequest = async (data: EnrollmentRequestType) => {
 };
 
 const getEnrollments = async (emailFilter: string = "") => {
-    const emailSelect = {};
     return prismaClient.users.findMany({
         where: {
             accountStatus: "Pending",
@@ -104,7 +102,7 @@ const approveEnrollment = async (userId: string, data: EnrollmentType) =>  {
         }
     });
 
-    return {data: user} as ModelReturnTypes<typeof user>;
+    return {data: user, statusCode: 200} as ModelReturnTypes<typeof user>;
 };
 
 const enrollUser = async (data: EnrollmentType) => {
@@ -138,7 +136,7 @@ const enrollUser = async (data: EnrollmentType) => {
         }
     });
 
-    return {data: user} as ModelReturnTypes<typeof user>;
+    return {data: user, statusCode: 201} as ModelReturnTypes<typeof user>;
 };
 
 export {

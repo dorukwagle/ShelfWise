@@ -15,6 +15,7 @@ import Publication from "../../validations/Publication";
 import Author from "../../validations/Author";
 import {assistantManagerAuth} from "../../middlewares/auth";
 import SessionRequest from "../../entities/SessionRequest";
+import formatValidationErrors from "../../utils/formatValidationErrors";
 
 
 const attributes = express.Router();
@@ -38,8 +39,9 @@ attributes.get("/genres",
 
 attributes.post("/genres", assistantManagerAuth, async (req, res) => {
     const validation = Genre.safeParse(req.body);
-    if (validation.error)
-        return res.status(400).json({error: validation.error!.message});
+    const err = formatValidationErrors(validation);
+    if (err)
+        return res.status(err.statusCode).json(err.error);
 
     res.json(await addGenre(validation.data!.genre));
 });
