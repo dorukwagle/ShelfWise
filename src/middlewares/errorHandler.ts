@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import logger from "../startup/logging";
+import logger from "../utils/logging";
 
 const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
     if (err.name === "SyntaxError") return res.status(422).json({ error: "Invalid JSON data" });

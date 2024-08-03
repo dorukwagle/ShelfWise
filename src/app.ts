@@ -3,7 +3,7 @@ import "express-async-errors";
 import cors from "cors";
 import initializeRoutes from "./startup/routes";
 import errorHandler from "./middlewares/errorHandler";
-import routesLogger from "./startup/routesLogger";
+import routesLogger from "./utils/routesLogger";
 
 const app = express();
 

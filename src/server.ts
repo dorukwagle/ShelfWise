@@ -1,5 +1,5 @@
 import app from "./app";
-import logger from "./startup/logging";
+import logger from "./utils/logging";
 const port = process.env.PORT || 3000;
 
 

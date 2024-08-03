@@ -4,19 +4,7 @@ import {hashPassword} from "../../utils/hash";
 import {Users} from "@prisma/client";
 import Enrollment, {EnrollmentType} from "../../validations/Enrollment";
 import ModelReturnTypes from "../../entities/ModelReturnTypes";
-
-
-const invalidResponse = <D = {}, E = {}>(validation: any) => {
-    const res = {} as ModelReturnTypes<D, E>;
-    res.statusCode = 400;
-
-    if (Object.keys(validation.error?.formErrors?.fieldErrors || {}).length)
-        res.error = validation.error?.formErrors.fieldErrors;
-    else if (validation.error)
-        res.error = validation.error;
-
-    return res.error ? res : null;
-};
+import formatValidationErrors from "../../utils/formatValidationErrors";
 
 const validateApproveEnrollmentRequest = async (userId: string, data: EnrollmentType) => {
     const res = {} as ModelReturnTypes<EnrollmentType>;
@@ -32,7 +20,7 @@ const validateApproveEnrollmentRequest = async (userId: string, data: Enrollment
     }
 
     const validation = await Enrollment(userId).safeParseAsync(data);
-    const response = invalidResponse<EnrollmentType>(validation);
+    const response = formatValidationErrors<EnrollmentType>(validation);
 
     if (response) return response;
 
@@ -46,7 +34,7 @@ const createEnrollmentRequest = async (data: EnrollmentRequestType) => {
     const validation =
         await EnrollmentRequest.safeParseAsync(data);
 
-    const response = invalidResponse<Users, any>(validation);
+    const response = formatValidationErrors<Users, any>(validation);
     if (response) return response;
 
     const validatedData = validation.data!;
@@ -122,7 +110,7 @@ const approveEnrollment = async (userId: string, data: EnrollmentType) =>  {
 const enrollUser = async (data: EnrollmentType) => {
     const validation = await Enrollment("").safeParseAsync(data);
 
-    const response = invalidResponse(validation);
+    const response = formatValidationErrors(validation);
     if (response) return response;
 
     const userInfo = await EnrollmentRequest.safeParseAsync(validation.data);

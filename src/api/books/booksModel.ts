@@ -1,24 +1,13 @@
 import ModelReturnTypes from "../../entities/ModelReturnTypes";
 import BookInfo, {BookInfoType} from "../../validations/BookInfo";
-
-const invalidResponse = <D = {}, E = {}>(validation: any) => {
-    const res = {} as ModelReturnTypes<D, E>;
-    res.statusCode = 400;
-
-    if (Object.keys(validation.error?.formErrors?.fieldErrors || {}).length)
-        res.error = validation.error?.formErrors.fieldErrors;
-    else if (validation.error)
-        res.error = validation.error;
-
-    return res.error ? res : null;
-};
+import formatValidationErrors from "../../utils/formatValidationErrors";
 
 const addBook = async (req: BookInfoType, coverPhoto: Express.Multer.File | undefined) => {
     const res = {statusCode: 400} as ModelReturnTypes;
 // check barcodes length equal total pieces
     const validation = await BookInfo.safeParseAsync(req);
 
-    const errRes = invalidResponse(validation);
+    const errRes = formatValidationErrors(validation);
     if (errRes) return errRes;
 
 
