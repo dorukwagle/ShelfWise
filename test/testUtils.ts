@@ -16,6 +16,8 @@ import getUserInfo from "../src/utils/userUtils";
 import {startServer, stopServer} from "./singletorServer";
 import app from "../src/app";
 import {v7} from "uuid";
+import * as fs from "node:fs";
+import path from "path";
 
 vi.stubEnv("NODE_ENV", "test");
 
@@ -40,6 +42,8 @@ export const testPrisma = new PrismaClient({
     datasourceUrl: process.env.TEST_DATABASE_URL,
 });
 
+export const imagesUploadPath = path.join(process.cwd(), "storage/uploads/images");
+
 const executeSafely = async <T>(func: () => T) => {
     try {
         return func();
@@ -54,7 +58,11 @@ const clearBooksData = async () => {
     await prismaClient.bookPurchases.deleteMany();
     await prismaClient.bookWithGenres.deleteMany();
     await prismaClient.bookWithAuthors.deleteMany();
-    // delete the uploaded file:- book cover photo
+    await prismaClient.bookInfo.deleteMany();
+
+    const basePath = process.cwd() + "/storage/uploads/images";
+    const files = fs.readdirSync(basePath);
+    files.forEach((file) => fs.unlinkSync(path.join(basePath, file)));
 };
 
 const clearUpSetup = async () => {
@@ -64,9 +72,9 @@ const clearUpSetup = async () => {
     await prismaClient.userRoles.deleteMany();
 
     await prismaClient.authors.deleteMany();
-    await prismaClient.publishers.deleteMany();
     await prismaClient.genres.deleteMany();
     await prismaClient.globalAttributes.deleteMany();
+    await prismaClient.publishers.deleteMany();
 
     await prismaClient.$disconnect();
     stopServer();

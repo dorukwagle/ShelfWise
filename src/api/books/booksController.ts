@@ -28,7 +28,6 @@ booksController.post("/",
         if (!req.file) return res.status(400).json({error: "please upload cover photo"});
 
         const {data, statusCode, error} = await addBook(req.body, req.file);
-
         res.status(statusCode).json(error ? error : data);
     });
 

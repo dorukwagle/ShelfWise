@@ -205,7 +205,7 @@ model BookInfo {
   publisher Publishers @relation(fields: [publisherId], references: [publisherId])
   isbns isbns[]
   bookGenres BookWithGenres[]
-  book Books[]
+  books Books[]
   purchases BookPurchases[]
   reservations BookReservations[]
   comments Comments[]

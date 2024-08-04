@@ -4,6 +4,7 @@ import cors from "cors";
 import initializeRoutes from "./startup/routes";
 import errorHandler from "./middlewares/errorHandler";
 import routesLogger from "./utils/routesLogger";
+import "./utils/bigintSerializer"
 
 const app = express();
 
