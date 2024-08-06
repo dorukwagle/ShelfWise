@@ -57,7 +57,7 @@ describe("BooksController", async () => {
         bookPayload.bookAuthors = [Entities.authors.authorId];
         bookPayload.publisherId = Entities.publisher.publisherId;
         bookPayload.bookGenres = [Entities.genres.genreId];
-    }
+    };
 
     describe("POST /api/books", async () => {
         const req = new FetchRequest(`http://localhost:${port}/api/books`)
@@ -170,17 +170,17 @@ describe("BooksController", async () => {
             await clearBooksData();
         });
 
-        const getUpdateAgent = (id: string) => {
+        const getUpdateAgent = (id: string, params: string = "") => {
             return request(`http://localhost:${port}`)
-                .put(`/api/books/info/${id}`)
-                .set("Cookie", `sessionId=${Entities.session.session}`)
-                .send(bookPayload);
+                .put(`/api/books/info/${id}/${params}`)
+                .set("Cookie", `sessionId=${Entities.session.session}`);
         };
 
         it("should return 404 error if invalid bookInfoId is given", async () => {
             const res = await getUpdateAgent("sdlkf32424")
+                .send(bookPayload)
                 .expect(404);
-            expect.soft(res.body.error).toContain('not found');
+            expect.soft(res.body.error).toContain("not found");
         });
 
         it("should update the bookInfo with the new data", async () => {
@@ -188,25 +188,54 @@ describe("BooksController", async () => {
             bookPayload.bookNumber = "98989897";
             bookPayload.numberOfPages = 501;
 
-            const res = await getUpdateAgent(bookInfo.bookInfoId).expect(200);
+            const res = await getUpdateAgent(bookInfo.bookInfoId)
+                .send(bookPayload)
+                .expect(200);
             const data = res.body;
 
             expect.soft(data).toMatchObject({
                 classNumber: "98989898",
                 bookNumber: "98989897",
-                numberOfPages: 501,
+                numberOfPages: 501
             });
         });
 
-       describe("PUT /api/books/info/:infoId/coverphoto", async () => {
-           it("should return 400 if photo is not sent", async () => {
+        describe("PUT /api/books/info/:infoId/coverphoto", async () => {
+            it("should return 400 if photo is not sent", async () => {
+                const res = await getUpdateAgent(bookInfo.bookInfoId, "coverphoto")
+                    .expect(400);
+                expect.soft(res.body.error).toContain("upload");
+            });
 
-           });
+            it("should update the coverPhoto once the file is sent", async () => {
+                await getUpdateAgent(bookInfo.bookInfoId, "coverphoto")
+                    .attach("coverPhoto", filePath)
+                    .expect(200);
+            });
 
-           it("should update the coverPhoto once the file is sent", async () => {
+            it("should delete old photo, and replace with new one in the storage", async () => {
+                const getPhoto = async () => prismaClient.bookInfo.findUnique({
+                    where: {
+                        bookInfoId: bookInfo.bookInfoId
+                    }
+                });
+                const photo = await getPhoto();
 
-           });
-       })
+                let photoPath = path.join(imagesUploadPath, photo!.coverPhoto);
+                expect.soft(fs.existsSync(photoPath)).toBeTruthy();
+
+                await getUpdateAgent(bookInfo.bookInfoId, "coverphoto")
+                    .attach("coverPhoto", filePath)
+                    .expect(200);
+
+                expect.soft(fs.existsSync(photoPath)).toBeFalsy();
+
+                const newPhoto = await getPhoto();
+                photoPath = path.join(imagesUploadPath, newPhoto!.coverPhoto);
+
+                expect.soft(fs.existsSync(photoPath)).toBeTruthy();
+            });
+        });
     });
 });
 

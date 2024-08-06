@@ -2,15 +2,16 @@ import path from "path";
 import multer from "multer";
 import * as fs from "node:fs";
 import {v7} from "uuid";
+import {IMAGE_UPLOAD_PATH} from "../constants/constants";
 
 
-const imagePath = path.join(process.cwd(), "storage", "uploads", "images");
 
-if (!fs.existsSync(imagePath)) fs.mkdirSync(imagePath, { recursive: true });
+
+if (!fs.existsSync(IMAGE_UPLOAD_PATH)) fs.mkdirSync(IMAGE_UPLOAD_PATH, { recursive: true });
 
 const imageStorage = multer.diskStorage({
     destination: function (_req, _file, cb) {
-        cb(null, imagePath);
+        cb(null, IMAGE_UPLOAD_PATH);
     },
     filename: function (_req, file, cb) {
         const fileName =

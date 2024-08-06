@@ -2,8 +2,9 @@ import express, {NextFunction, Request, RequestHandler, Response} from "express"
 import {assistantManagerAuth, memberAuth} from "../../middlewares/auth";
 import {imageUpload} from "../../utils/fileUpload";
 import SessionRequest from "../../entities/SessionRequest";
-import {addBook, updateBookInfo} from "./booksModel";
+import {addBook, updateBookInfo, updateCoverPhoto} from "./booksModel";
 import {BookInfoType} from "../../validations/BookInfo";
+import multer from "multer";
 
 
 const booksController = express.Router();
@@ -31,9 +32,20 @@ booksController.post("/",
         res.status(statusCode).json(error ? error : data);
     });
 
-booksController.put("/info/:infoId", assistantManagerAuth, async (req: SessionRequest<{infoId: string}>, res: Response) => {
+booksController.put("/info/:infoId", assistantManagerAuth, async (req: SessionRequest<{
+    infoId: string
+}>, res: Response) => {
     const {data, statusCode, error} = await updateBookInfo(req.params.infoId, req.body);
     res.status(statusCode).json(error ? error : data);
 });
+
+booksController.put("/info/:infoId/coverphoto",
+    [assistantManagerAuth, uploadHandler(imageUpload.single("coverPhoto"))],
+    async (req: SessionRequest<{ infoId: string }>, res: Response) => {
+        if (!req.file) return res.status(400).json({error: "please upload cover photo"});
+
+        const {data, statusCode, error} = await updateCoverPhoto(req.params.infoId, req.file);
+        res.status(statusCode).json(error ? error : data);
+    });
 
 export default booksController;

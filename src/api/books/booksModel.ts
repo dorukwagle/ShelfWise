@@ -2,6 +2,9 @@ import ModelReturnTypes from "../../entities/ModelReturnTypes";
 import BookValidator, {BookInfoOnlyType, BookInfoType} from "../../validations/BookInfo";
 import formatValidationErrors from "../../utils/formatValidationErrors";
 import prismaClient from "../../utils/prismaClient";
+import * as fs from "node:fs";
+import path from "path";
+import {IMAGE_UPLOAD_PATH} from "../../constants/constants";
 
 const v = new BookValidator();
 
@@ -104,7 +107,34 @@ const updateBookInfo = async (bookInfoId: string, data: BookInfoOnlyType) => {
     return res;
 };
 
+const updateCoverPhoto = async (bookInfoId: string, file: Express.Multer.File) => {
+    const res = {statusCode: 400} as ModelReturnTypes;
+
+    const bookInfo = await prismaClient.bookInfo.findUnique({
+        where: {bookInfoId}
+    });
+
+    if (!bookInfo) {
+        res.statusCode = 404;
+        res.error = {error: "Book not found"};
+        return res;
+    }
+
+    res.data = await prismaClient.bookInfo.update({
+        where: {bookInfoId},
+        data: {
+            coverPhoto: file.filename
+        }
+    });
+
+    fs.unlinkSync(path.join(IMAGE_UPLOAD_PATH, bookInfo.coverPhoto));
+    
+    res.statusCode = 200;
+    return res;
+}
+
 export {
     addBook,
-    updateBookInfo
+    updateBookInfo,
+    updateCoverPhoto
 };
