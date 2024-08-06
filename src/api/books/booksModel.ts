@@ -1,18 +1,20 @@
 import ModelReturnTypes from "../../entities/ModelReturnTypes";
-import BookInfo, {BookInfoType} from "../../validations/BookInfo";
+import BookValidator, {BookInfoOnlyType, BookInfoType} from "../../validations/BookInfo";
 import formatValidationErrors from "../../utils/formatValidationErrors";
 import prismaClient from "../../utils/prismaClient";
 
+const v = new BookValidator();
+
 const addBook = async (req: BookInfoType, coverPhoto: Express.Multer.File) => {
     const res = {statusCode: 400} as ModelReturnTypes;
-    const validation = await BookInfo.safeParseAsync(req);
+    const validation = await v.BookInfo().safeParseAsync(req);
 
     const errRes = formatValidationErrors(validation);
     if (errRes) return errRes;
 
     const data = validation.data!;
     if (data.totalPieces !== data.barcodes.length) {
-        res.error = {error: "totalPieces count and barcodes count mismatch"}
+        res.error = {error: "totalPieces count and barcodes count mismatch"};
         return res;
     }
 
@@ -42,7 +44,7 @@ const addBook = async (req: BookInfoType, coverPhoto: Express.Multer.File) => {
             purchases: {
                 create: {
                     totalPieces: data.totalPieces,
-                    pricePerPiece: data.pricePerPiece,
+                    pricePerPiece: data.pricePerPiece
                 }
             },
             isbns: {
@@ -59,7 +61,7 @@ const addBook = async (req: BookInfoType, coverPhoto: Express.Multer.File) => {
                 createMany: {
                     data: barcodesData
                 }
-            },
+            }
         },
         include: {
             bookGenres: true,
@@ -72,8 +74,37 @@ const addBook = async (req: BookInfoType, coverPhoto: Express.Multer.File) => {
 
     res.statusCode = 200;
     return res;
-}
+};
+
+const updateBookInfo = async (bookInfoId: string, data: BookInfoOnlyType) => {
+    const res = {statusCode: 400} as ModelReturnTypes;
+
+    const bookInfo = await prismaClient.bookInfo.findUnique({
+        where: {bookInfoId}
+    });
+
+    if (!bookInfo) {
+        res.statusCode = 404;
+        res.error = {error: "Book not found"};
+        return res;
+    }
+    const exclude = {column: "bookInfoId", value: bookInfo.bookInfoId};
+
+    const validations = await v.BookInfoOnly(exclude).safeParseAsync(data);
+
+    const errRes = formatValidationErrors(validations);
+    if (errRes) return errRes;
+
+    res.data = await prismaClient.bookInfo.update({
+        where: {bookInfoId: bookInfo.bookInfoId},
+        data: validations.data!
+    })
+
+    res.statusCode = 200;
+    return res;
+};
 
 export {
-    addBook
-}
+    addBook,
+    updateBookInfo
+};

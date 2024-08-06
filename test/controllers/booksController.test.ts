@@ -13,30 +13,55 @@ import request from "supertest";
 import prismaClient from "../../src/utils/prismaClient";
 import * as fs from "fs";
 import path from "path";
+import {BookInfo} from "@prisma/client";
 
 
 describe("BooksController", async () => {
+    const filePath = "./test/assets/fileTest.jpg";
+    let bookPayload: { [key: string]: any };
+
+    const getAgent = () => {
+        const agent = request(`http://localhost:${port}`)
+            .post(`/api/books`)
+            .attach("coverPhoto", filePath)
+            .set("Cookie", `sessionId=${Entities.session.session}`);
+
+        for (const key in bookPayload) {
+            const value = bookPayload[key];
+            const tp = typeof value;
+            agent.field(tp === "object" ? `${key}[]` : key,
+                bookPayload[key]);
+        }
+        return agent;
+    };
+
+    const reallocatePayload = () => {
+        bookPayload = {
+            classNumber: "958347983",
+            bookNumber: "9837459837",
+            title: "hello test book",
+            subTitle: "subtitle",
+            editionStatement: "hello edition",
+            numberOfPages: 387,
+            publicationYear: "2019",
+            seriesStatement: "hello series",
+            publisherId: "",
+            bookAuthors: [""],
+            isbns: ["34345353", "34534512", "898734"],
+            bookGenres: [""],
+            pricePerPiece: 345,
+            totalPieces: 5,
+            barcodes: ["53487593844", "8923489243", "3768287382", "34535", "34545345"]
+        };
+
+        bookPayload.bookAuthors = [Entities.authors.authorId];
+        bookPayload.publisherId = Entities.publisher.publisherId;
+        bookPayload.bookGenres = [Entities.genres.genreId];
+    }
+
     describe("POST /api/books", async () => {
         const req = new FetchRequest(`http://localhost:${port}/api/books`)
             .setDefaultHeaders();
-        const filePath = "./test/assets/fileTest.jpg";
-
-        let bookPayload: { [key: string]: any };
-
-        const getAgent = () => {
-            const agent = request(`http://localhost:${port}`)
-                .post(`/api/books`)
-                .attach("coverPhoto", filePath)
-                .set("Cookie", `sessionId=${Entities.session.session}`);
-
-            for (const key in bookPayload) {
-                const value = bookPayload[key];
-                const tp = typeof value;
-                agent.field(tp === "object" ? `${key}[]` : key,
-                    bookPayload[key]);
-            }
-            return agent;
-        };
 
         beforeAll(async () => {
             await initialSetup();
@@ -47,27 +72,7 @@ describe("BooksController", async () => {
         });
 
         beforeEach(async () => {
-            bookPayload = {
-                classNumber: "958347983",
-                bookNumber: "9837459837",
-                title: "hello test book",
-                subTitle: "subtitle",
-                editionStatement: "hello edition",
-                numberOfPages: 387,
-                publicationYear: "2019",
-                seriesStatement: "hello series",
-                publisherId: "",
-                bookAuthors: [""],
-                isbns: ["34345353", "34534512", "898734"],
-                bookGenres: [""],
-                pricePerPiece: 345,
-                totalPieces: 5,
-                barcodes: ["53487593844", "8923489243", "3768287382", "34535", "34545345"]
-            };
-
-            bookPayload.bookAuthors = [Entities.authors.authorId];
-            bookPayload.publisherId = Entities.publisher.publisherId;
-            bookPayload.bookGenres = [Entities.genres.genreId];
+            reallocatePayload();
 
             req.reset()
                 .setDefaultHeaders()
@@ -141,6 +146,67 @@ describe("BooksController", async () => {
 
             expect.soft(fs.existsSync(path.join(imagesUploadPath, book!.coverPhoto))).toBeTruthy();
         });
+    });
+
+    describe("PUT /api/books/info/:infoId", async () => {
+        let bookInfo: BookInfo;
+
+        beforeAll(async () => {
+            await initialSetup();
+        });
+
+        afterAll(async () => {
+            await clearUpSetup();
+        });
+
+        beforeEach(async () => {
+            reallocatePayload();
+
+            const res = await getAgent().expect(200);
+            bookInfo = res.body;
+        });
+
+        afterEach(async () => {
+            await clearBooksData();
+        });
+
+        const getUpdateAgent = (id: string) => {
+            return request(`http://localhost:${port}`)
+                .put(`/api/books/info/${id}`)
+                .set("Cookie", `sessionId=${Entities.session.session}`)
+                .send(bookPayload);
+        };
+
+        it("should return 404 error if invalid bookInfoId is given", async () => {
+            const res = await getUpdateAgent("sdlkf32424")
+                .expect(404);
+            expect.soft(res.body.error).toContain('not found');
+        });
+
+        it("should update the bookInfo with the new data", async () => {
+            bookPayload.classNumber = "98989898";
+            bookPayload.bookNumber = "98989897";
+            bookPayload.numberOfPages = 501;
+
+            const res = await getUpdateAgent(bookInfo.bookInfoId).expect(200);
+            const data = res.body;
+
+            expect.soft(data).toMatchObject({
+                classNumber: "98989898",
+                bookNumber: "98989897",
+                numberOfPages: 501,
+            });
+        });
+
+       describe("PUT /api/books/info/:infoId/coverphoto", async () => {
+           it("should return 400 if photo is not sent", async () => {
+
+           });
+
+           it("should update the coverPhoto once the file is sent", async () => {
+
+           });
+       })
     });
 });
 
