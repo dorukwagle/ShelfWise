@@ -2,9 +2,8 @@ import express, {NextFunction, Request, RequestHandler, Response} from "express"
 import {assistantManagerAuth, memberAuth} from "../../middlewares/auth";
 import {imageUpload} from "../../utils/fileUpload";
 import SessionRequest from "../../entities/SessionRequest";
-import {addBook, updateBookInfo, updateCoverPhoto} from "./booksModel";
+import {addBook, updateAuthors, updateBookInfo, updateCoverPhoto, updateGenres, updateISBNs} from "./booksModel";
 import {BookInfoType} from "../../validations/BookInfo";
-import multer from "multer";
 
 
 const booksController = express.Router();
@@ -47,5 +46,21 @@ booksController.put("/info/:infoId/coverphoto",
         const {data, statusCode, error} = await updateCoverPhoto(req.params.infoId, req.file);
         res.status(statusCode).json(error ? error : data);
     });
+
+booksController.put("/info/:infoId/genres", assistantManagerAuth, async (req: SessionRequest<{ infoId: string }>, res) => {
+    const {data, statusCode, error} = await updateGenres(req.params.infoId, req.body);
+    res.status(statusCode).json(error ? error : data);
+});
+
+booksController.put("/info/:infoId/authors", assistantManagerAuth, async (req: SessionRequest<{ infoId: string }>, res) => {
+    const {data, statusCode, error} = await updateAuthors(req.params.infoId, req.body);
+    res.status(statusCode).json(error ? error : data);
+});
+
+booksController.put("/info/:infoId/isbns", assistantManagerAuth, async (req: SessionRequest<{ infoId: string }>, res) => {
+    const {data, statusCode, error} = await updateISBNs(req.params.infoId, req.body);
+    res.status(statusCode).json(error ? error : data);
+});
+
 
 export default booksController;

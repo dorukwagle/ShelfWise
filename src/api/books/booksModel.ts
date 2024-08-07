@@ -1,12 +1,33 @@
 import ModelReturnTypes from "../../entities/ModelReturnTypes";
-import BookValidator, {BookInfoOnlyType, BookInfoType} from "../../validations/BookInfo";
+import BookValidator, {
+    BookAuthorsOnlyType,
+    BookGenresOnlyType,
+    BookInfoOnlyType,
+    BookInfoType, ISBNsOnlyType
+} from "../../validations/BookInfo";
 import formatValidationErrors from "../../utils/formatValidationErrors";
 import prismaClient from "../../utils/prismaClient";
 import * as fs from "node:fs";
 import path from "path";
 import {IMAGE_UPLOAD_PATH} from "../../constants/constants";
+import {BookInfo} from "@prisma/client";
 
 const v = new BookValidator();
+
+const findBookOrFail = async (bookInfoId: string) => {
+    const res = {statusCode: 404} as ModelReturnTypes<BookInfo>;
+
+    const bookInfo = await prismaClient.bookInfo.findUnique({
+        where: {bookInfoId}
+    });
+
+    if (!bookInfo)
+        res.error = {error: "Book not found"};
+    else
+        res.data = bookInfo;
+
+    return res;
+}
 
 const addBook = async (req: BookInfoType, coverPhoto: Express.Multer.File) => {
     const res = {statusCode: 400} as ModelReturnTypes;
@@ -82,16 +103,10 @@ const addBook = async (req: BookInfoType, coverPhoto: Express.Multer.File) => {
 const updateBookInfo = async (bookInfoId: string, data: BookInfoOnlyType) => {
     const res = {statusCode: 400} as ModelReturnTypes;
 
-    const bookInfo = await prismaClient.bookInfo.findUnique({
-        where: {bookInfoId}
-    });
+    const bookInfo = await findBookOrFail(bookInfoId);
+    if (bookInfo.error) return bookInfo;
 
-    if (!bookInfo) {
-        res.statusCode = 404;
-        res.error = {error: "Book not found"};
-        return res;
-    }
-    const exclude = {column: "bookInfoId", value: bookInfo.bookInfoId};
+    const exclude = {column: "bookInfoId", value: bookInfo.data.bookInfoId};
 
     const validations = await v.BookInfoOnly(exclude).safeParseAsync(data);
 
@@ -99,7 +114,7 @@ const updateBookInfo = async (bookInfoId: string, data: BookInfoOnlyType) => {
     if (errRes) return errRes;
 
     res.data = await prismaClient.bookInfo.update({
-        where: {bookInfoId: bookInfo.bookInfoId},
+        where: {bookInfoId: bookInfo.data.bookInfoId},
         data: validations.data!
     })
 
@@ -110,15 +125,8 @@ const updateBookInfo = async (bookInfoId: string, data: BookInfoOnlyType) => {
 const updateCoverPhoto = async (bookInfoId: string, file: Express.Multer.File) => {
     const res = {statusCode: 400} as ModelReturnTypes;
 
-    const bookInfo = await prismaClient.bookInfo.findUnique({
-        where: {bookInfoId}
-    });
-
-    if (!bookInfo) {
-        res.statusCode = 404;
-        res.error = {error: "Book not found"};
-        return res;
-    }
+    const bookInfo = await findBookOrFail(bookInfoId);
+    if (bookInfo.error) return bookInfo;
 
     res.data = await prismaClient.bookInfo.update({
         where: {bookInfoId},
@@ -127,8 +135,80 @@ const updateCoverPhoto = async (bookInfoId: string, file: Express.Multer.File) =
         }
     });
 
-    fs.unlinkSync(path.join(IMAGE_UPLOAD_PATH, bookInfo.coverPhoto));
-    
+    fs.unlinkSync(path.join(IMAGE_UPLOAD_PATH, bookInfo.data.coverPhoto));
+
+    res.statusCode = 200;
+    return res;
+}
+
+const updateGenres = async (bookInfoId: string, data: BookGenresOnlyType) => {
+    const res = {statusCode: 400} as ModelReturnTypes;
+
+    const bookInfo = await findBookOrFail(bookInfoId);
+    if (bookInfo.error) return bookInfo;
+
+    const validation = await v.BookGenresOnly().safeParseAsync(data);
+    const errRes = formatValidationErrors(validation);
+    if (errRes) return errRes;
+
+    await prismaClient.bookWithGenres.deleteMany({
+        where: {bookInfoId}
+    });
+
+    const updates = validation.data!.bookGenres.map(genreId => ({bookInfoId, genreId}));
+
+    res.data = await prismaClient.bookWithGenres.createMany({
+        data: updates,
+    });
+
+    res.statusCode = 200;
+    return res;
+}
+
+const updateAuthors = async (bookInfoId: string, data: BookAuthorsOnlyType) => {
+    const res = {statusCode: 400} as ModelReturnTypes;
+
+    const bookInfo = await findBookOrFail(bookInfoId);
+    if (bookInfo.error) return bookInfo;
+
+    const validation = await v.BookAuthorsOnly().safeParseAsync(data);
+    const errRes = formatValidationErrors(validation);
+    if (errRes) return errRes;
+
+    await prismaClient.bookWithAuthors.deleteMany({
+        where: {bookInfoId}
+    });
+
+    const updates = validation.data!.bookAuthors.map(authorId => ({bookInfoId, authorId}));
+
+    res.data = await prismaClient.bookWithAuthors.createMany({
+        data: updates,
+    });
+
+    res.statusCode = 200;
+    return res;
+}
+
+const updateISBNs = async (bookInfoId: string, data: ISBNsOnlyType) => {
+    const res = {statusCode: 400} as ModelReturnTypes;
+
+    const bookInfo = await findBookOrFail(bookInfoId);
+    if (bookInfo.error) return bookInfo;
+
+    const validation = await v.ISBNsOnly({column: "bookInfoId", value: bookInfoId}).safeParseAsync(data);
+    const errRes = formatValidationErrors(validation);
+    if (errRes) return errRes;
+
+    await prismaClient.isbns.deleteMany({
+        where: {bookInfoId}
+    });
+
+    const updates = validation.data!.isbns.map(isbn => ({bookInfoId, isbn}));
+
+    res.data = await prismaClient.isbns.createMany({
+        data: updates,
+    });
+
     res.statusCode = 200;
     return res;
 }
@@ -136,5 +216,8 @@ const updateCoverPhoto = async (bookInfoId: string, file: Express.Multer.File) =
 export {
     addBook,
     updateBookInfo,
-    updateCoverPhoto
+    updateCoverPhoto,
+    updateGenres,
+    updateAuthors,
+    updateISBNs
 };

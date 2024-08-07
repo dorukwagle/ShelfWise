@@ -236,6 +236,30 @@ describe("BooksController", async () => {
                 expect.soft(fs.existsSync(photoPath)).toBeTruthy();
             });
         });
+
+        describe("PUT /api/books/info/:infoId/genres", async () => {
+            it("should delete old genres and update with new ones if valid request is sent", async () => {
+                await getUpdateAgent(bookInfo.bookInfoId, "genres")
+                    .send({"bookGenres": [Entities.genres.genreId]})
+                    .expect(200);
+            });
+        });
+
+        describe("PUT /api/books/info/:infoId/authors", async () => {
+            it("should delete old genres and update with new ones if valid request is sent", async () => {
+                await getUpdateAgent(bookInfo.bookInfoId, "authors")
+                    .send({"bookAuthors": [Entities.authors.authorId]})
+                    .expect(200);
+            });
+        });
+
+        describe("PUT /api/books/info/:infoId/isbns", async () => {
+            it("should delete old genres and update with new ones if valid request is sent", async () => {
+                await getUpdateAgent(bookInfo.bookInfoId, "isbns")
+                    .send({"isbns": ["43532", "3453543", "345"]})
+                    .expect(200);
+            });
+        });
     });
 });
 
