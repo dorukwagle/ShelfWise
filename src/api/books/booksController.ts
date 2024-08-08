@@ -2,7 +2,15 @@ import express, {NextFunction, Request, RequestHandler, Response} from "express"
 import {assistantManagerAuth, memberAuth} from "../../middlewares/auth";
 import {imageUpload} from "../../utils/fileUpload";
 import SessionRequest from "../../entities/SessionRequest";
-import {addBook, updateAuthors, updateBookInfo, updateCoverPhoto, updateGenres, updateISBNs} from "./booksModel";
+import {
+    addBook,
+    updateAuthors, updateBarcode,
+    updateBookInfo,
+    updateCoverPhoto,
+    updateGenres,
+    updateISBNs,
+    updatePurchase
+} from "./booksModel";
 import {BookInfoType} from "../../validations/BookInfo";
 
 
@@ -61,6 +69,21 @@ booksController.put("/info/:infoId/isbns", assistantManagerAuth, async (req: Ses
     const {data, statusCode, error} = await updateISBNs(req.params.infoId, req.body);
     res.status(statusCode).json(error ? error : data);
 });
+
+
+//infoId is purchaseId
+booksController.put("/info/:infoId/purchase", assistantManagerAuth, async (req: SessionRequest<{ infoId: string }>, res) => {
+    const {data, statusCode, error} = await updatePurchase(req.params.infoId, req.body.pricePerPiece);
+    res.status(statusCode).json(error ? error : data);
+});
+
+// booksController.put("/info/:infoId/update_barcode", assistantManagerAuth, async (req: SessionRequest<{ infoId: string }>, res) => {
+//     if (!req.body.barcode) return res.status(400).json({error: "barcode is required cover photo"});
+//
+//     const {data, statusCode, error} = await updateBarcode(req.params.infoId, req.body.barcode);
+//     res.status(statusCode).json(error ? error : data);
+// });
+
 
 
 export default booksController;

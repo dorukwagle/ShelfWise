@@ -260,6 +260,16 @@ describe("BooksController", async () => {
                     .expect(200);
             });
         });
+
+        describe("PUT /api/books/info/:infoId/purchase", async () => {
+            it("should delete old genres and update with new ones if valid request is sent", async () => {
+                const purchase = await prismaClient.bookPurchases.findFirst();
+
+                await getUpdateAgent(purchase.purchaseId, "purchase")
+                    .send({"pricePerPiece": "250"})
+                    .expect(200);
+            });
+        });
     });
 });
 

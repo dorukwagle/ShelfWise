@@ -3,7 +3,7 @@ import BookValidator, {
     BookAuthorsOnlyType,
     BookGenresOnlyType,
     BookInfoOnlyType,
-    BookInfoType, ISBNsOnlyType
+    BookInfoType, BookPurchaseOnlyType, ISBNsOnlyType
 } from "../../validations/BookInfo";
 import formatValidationErrors from "../../utils/formatValidationErrors";
 import prismaClient from "../../utils/prismaClient";
@@ -11,6 +11,7 @@ import * as fs from "node:fs";
 import path from "path";
 import {IMAGE_UPLOAD_PATH} from "../../constants/constants";
 import {BookInfo} from "@prisma/client";
+import {z} from "zod";
 
 const v = new BookValidator();
 
@@ -213,11 +214,53 @@ const updateISBNs = async (bookInfoId: string, data: ISBNsOnlyType) => {
     return res;
 }
 
+const updatePurchase = async (purchaseId: string, pricePerPiece:string) => {
+    const res = {statusCode: 400} as ModelReturnTypes;
+
+    const purchase = await prismaClient.bookPurchases.findUnique({where: {purchaseId}});
+    if (!purchase) {
+        res.statusCode = 404;
+        res.error = {error: "purchaseId not found"};
+        return res;
+    }
+
+    const validation = (z.coerce.number({required_error: "pricePerPiece is required"})
+        .min(0)).safeParse(pricePerPiece);
+    const errRes = formatValidationErrors(validation);
+    if (errRes) return errRes;
+
+    res.data = await prismaClient.bookPurchases.update({
+        where: {purchaseId},
+        data: {
+            pricePerPiece: validation.data!
+        }
+    });
+
+    res.statusCode = 200;
+    return res;
+}
+
+const updateBarcode = async (bookId: string, barcode: string) => {
+
+}
+
+const deleteSingleCopy  = async (bookId: string) => {
+
+}
+
+const deleteWhole = async (bookId: string) => {
+
+}
+
 export {
     addBook,
     updateBookInfo,
     updateCoverPhoto,
     updateGenres,
     updateAuthors,
-    updateISBNs
+    updateISBNs,
+    updatePurchase,
+    updateBarcode,
+    deleteSingleCopy,
+    deleteWhole
 };
