@@ -3,7 +3,7 @@ import {assistantManagerAuth, memberAuth} from "../../middlewares/auth";
 import {imageUpload} from "../../utils/fileUpload";
 import SessionRequest from "../../entities/SessionRequest";
 import {
-    addBook,
+    addBook, deleteSingleCopy, deleteWhole,
     updateAuthors, updateBarcode,
     updateBookInfo,
     updateCoverPhoto,
@@ -77,13 +77,22 @@ booksController.put("/info/:infoId/purchase", assistantManagerAuth, async (req: 
     res.status(statusCode).json(error ? error : data);
 });
 
-// booksController.put("/info/:infoId/update_barcode", assistantManagerAuth, async (req: SessionRequest<{ infoId: string }>, res) => {
-//     if (!req.body.barcode) return res.status(400).json({error: "barcode is required cover photo"});
-//
-//     const {data, statusCode, error} = await updateBarcode(req.params.infoId, req.body.barcode);
-//     res.status(statusCode).json(error ? error : data);
-// });
+//infoId is bookId
+booksController.put("/info/:infoId/barcode", assistantManagerAuth, async (req: SessionRequest<{ infoId: string }>, res) => {
+    if (!req.body.barcode) return res.status(400).json({error: "barcode is required"});
 
+    const {data, statusCode, error} = await updateBarcode(req.params.infoId, req.body.barcode);
+    res.status(statusCode).json(error ? error : data);
+});
 
+booksController.delete("/single/:id", assistantManagerAuth, async (req: SessionRequest<{ id: string }>, res) => {
+   await deleteSingleCopy(req.params.id);
+   res.status(200).json({message: "Given copy of book deleted successfully."});
+});
+
+booksController.delete("/whole/:id", assistantManagerAuth, async (req: SessionRequest<{ id: string }>, res) => {
+   await deleteWhole(req.params.id);
+   res.status(200).json({message: "Given Book deleted successfully."});
+});
 
 export default booksController;

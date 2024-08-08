@@ -12,6 +12,7 @@ import path from "path";
 import {IMAGE_UPLOAD_PATH} from "../../constants/constants";
 import {BookInfo} from "@prisma/client";
 import {z} from "zod";
+import {unique} from "../../utils/dbValidation";
 
 const v = new BookValidator();
 
@@ -28,7 +29,7 @@ const findBookOrFail = async (bookInfoId: string) => {
         res.data = bookInfo;
 
     return res;
-}
+};
 
 const addBook = async (req: BookInfoType, coverPhoto: Express.Multer.File) => {
     const res = {statusCode: 400} as ModelReturnTypes;
@@ -117,7 +118,7 @@ const updateBookInfo = async (bookInfoId: string, data: BookInfoOnlyType) => {
     res.data = await prismaClient.bookInfo.update({
         where: {bookInfoId: bookInfo.data.bookInfoId},
         data: validations.data!
-    })
+    });
 
     res.statusCode = 200;
     return res;
@@ -140,7 +141,7 @@ const updateCoverPhoto = async (bookInfoId: string, file: Express.Multer.File) =
 
     res.statusCode = 200;
     return res;
-}
+};
 
 const updateGenres = async (bookInfoId: string, data: BookGenresOnlyType) => {
     const res = {statusCode: 400} as ModelReturnTypes;
@@ -159,12 +160,12 @@ const updateGenres = async (bookInfoId: string, data: BookGenresOnlyType) => {
     const updates = validation.data!.bookGenres.map(genreId => ({bookInfoId, genreId}));
 
     res.data = await prismaClient.bookWithGenres.createMany({
-        data: updates,
+        data: updates
     });
 
     res.statusCode = 200;
     return res;
-}
+};
 
 const updateAuthors = async (bookInfoId: string, data: BookAuthorsOnlyType) => {
     const res = {statusCode: 400} as ModelReturnTypes;
@@ -183,12 +184,12 @@ const updateAuthors = async (bookInfoId: string, data: BookAuthorsOnlyType) => {
     const updates = validation.data!.bookAuthors.map(authorId => ({bookInfoId, authorId}));
 
     res.data = await prismaClient.bookWithAuthors.createMany({
-        data: updates,
+        data: updates
     });
 
     res.statusCode = 200;
     return res;
-}
+};
 
 const updateISBNs = async (bookInfoId: string, data: ISBNsOnlyType) => {
     const res = {statusCode: 400} as ModelReturnTypes;
@@ -207,14 +208,14 @@ const updateISBNs = async (bookInfoId: string, data: ISBNsOnlyType) => {
     const updates = validation.data!.isbns.map(isbn => ({bookInfoId, isbn}));
 
     res.data = await prismaClient.isbns.createMany({
-        data: updates,
+        data: updates
     });
 
     res.statusCode = 200;
     return res;
-}
+};
 
-const updatePurchase = async (purchaseId: string, pricePerPiece:string) => {
+const updatePurchase = async (purchaseId: string, pricePerPiece: string) => {
     const res = {statusCode: 400} as ModelReturnTypes;
 
     const purchase = await prismaClient.bookPurchases.findUnique({where: {purchaseId}});
@@ -238,19 +239,45 @@ const updatePurchase = async (purchaseId: string, pricePerPiece:string) => {
 
     res.statusCode = 200;
     return res;
-}
+};
 
 const updateBarcode = async (bookId: string, barcode: string) => {
+    const res = {statusCode: 404} as ModelReturnTypes;
 
-}
+    const valid = await unique("books", "barcode", barcode, {column: "bookId", value: bookId});
+    const book = await prismaClient.books.findUnique({where: {bookId}});
 
-const deleteSingleCopy  = async (bookId: string) => {
+    if (!(book && valid)) {
+        res.error = {error: valid ? "Book Not Found" : "Invalid barcode"};
+        return res;
+    }
 
-}
+    res.data = await prismaClient.books.update({
+        where: {bookId},
+        data: {
+            barcode
+        }
+    });
 
-const deleteWhole = async (bookId: string) => {
+    res.statusCode = 200;
+    return res;
+};
 
-}
+const deleteSingleCopy = async (bookId: string) => {
+    await prismaClient.books.update({
+        where: {bookId},
+        data: {deletedAt: new Date().toISOString()}
+    });
+
+    return true;
+};
+
+const deleteWhole = async (bookInfoId: string) => {
+    await prismaClient.bookInfo.update({
+        where: {bookInfoId},
+        data: {deletedAt: new Date().toISOString()}
+    });
+};
 
 export {
     addBook,
