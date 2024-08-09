@@ -33,8 +33,8 @@ const findBookOrFail = async (bookInfoId: string) => {
 
 const addBook = async (req: BookInfoType, coverPhoto: Express.Multer.File) => {
     const res = {statusCode: 400} as ModelReturnTypes;
-    const validation = await v.BookInfo().safeParseAsync(req);
 
+    const validation = await v.BookInfo().safeParseAsync(req);
     const errRes = formatValidationErrors(validation);
     if (errRes) return errRes;
 
@@ -279,6 +279,40 @@ const deleteWhole = async (bookInfoId: string) => {
     });
 };
 
+const addExistingBook = async (bookInfoId: string, data: BookPurchaseOnlyType) => {
+    const res = {statusCode: 400} as ModelReturnTypes;
+
+    const bookInfo = await findBookOrFail(bookInfoId);
+    if (bookInfo.error) return bookInfo;
+
+    const validation = await v.BookPurchaseOnly().safeParseAsync(data);
+    const errRes = formatValidationErrors(validation);
+    if (errRes) return errRes;
+
+    const valid = validation.data!;
+    if (valid.totalPieces !== valid.barcodes.length) {
+        res.error = {error: "totalPieces count and barcodes count mismatch"};
+        return res;
+    }
+
+    const purchase = await prismaClient.bookPurchases.create({
+        data: {
+            bookInfoId: bookInfoId,
+            totalPieces: valid.totalPieces,
+            pricePerPiece: valid.pricePerPiece
+        }
+    });
+
+    const booksData = valid.barcodes.map((barcode) => ({bookInfoId, barcode}));
+    const books = await prismaClient.books.createMany({
+       data: booksData
+    });
+
+    res.data = {books, purchase}
+    res.statusCode = 200;
+    return res;
+}
+
 export {
     addBook,
     updateBookInfo,
@@ -288,6 +322,7 @@ export {
     updateISBNs,
     updatePurchase,
     updateBarcode,
+    addExistingBook,
     deleteSingleCopy,
     deleteWhole
 };

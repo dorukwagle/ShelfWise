@@ -271,5 +271,84 @@ describe("BooksController", async () => {
             });
         });
     });
+
+    describe("POST /api/books/add-existing", async () => {
+        let bookInfo: BookInfo;
+        type updateType = {
+            totalPieces: number;
+            pricePerPiece: number;
+            barcodes: string[]
+        };
+
+        let updateInfo: updateType;
+
+        const getUpdateAgent = (id: string) => {
+            return request(`http://localhost:${port}`)
+                .post(`/api/books/add-existing/${id}`)
+                .set("Cookie", `sessionId=${Entities.session.session}`)
+                .send(updateInfo);
+        };
+
+        beforeAll(async () => {
+            await initialSetup();
+        });
+
+        afterAll(async () => {
+            await clearUpSetup();
+        });
+
+        beforeEach(async () => {
+            updateInfo = {
+                totalPieces: 3,
+                pricePerPiece: 340,
+                barcodes: ["234234", "24322", "23432"]
+            };
+            reallocatePayload();
+            const res = await getAgent().expect(200);
+            bookInfo = res.body;
+        });
+
+        afterEach(async () => {
+            await clearBooksData();
+        });
+
+        it("should return 404 error if book not found", async () => {
+            const res = await getUpdateAgent("34534").expect(404);
+            expect.soft(res.body.error).toContain("found");
+        });
+
+        it("should return 400 response if totalCount not match total barcodes", async () => {
+            updateInfo.totalPieces = 5;
+
+            const res = await getUpdateAgent(bookInfo.bookInfoId).expect(400);
+            expect.soft(res.body.error).toContain("mismatch");
+        });
+
+        it("should return 200 response if valid data is sent", async () => {
+            await getUpdateAgent(bookInfo.bookInfoId).expect(200);
+        });
+
+        it("should add new book purchase and additional barcodes in the database", async () => {
+            const initialBarcodes = await prismaClient.books.count({
+                where: {bookInfoId: bookInfo.bookInfoId}
+            });
+            const initialPurchase = await prismaClient.bookPurchases.count({
+                where: {bookInfoId: bookInfo.bookInfoId}
+            });
+
+            await getUpdateAgent(bookInfo.bookInfoId).expect(200);
+
+            const newBarcodes = await prismaClient.books.count({
+                where: {bookInfoId: bookInfo.bookInfoId}
+            });
+            const newPurchases = await prismaClient.bookPurchases.count({
+                where: {bookInfoId: bookInfo.bookInfoId}
+            });
+
+            expect.soft(initialPurchase).toBe(1);
+            expect.soft(newPurchases).toBe(2);
+            expect.soft(initialBarcodes + updateInfo.barcodes.length).toBe(newBarcodes);
+        });
+    });
 });
 

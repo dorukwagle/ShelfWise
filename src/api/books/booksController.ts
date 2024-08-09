@@ -3,7 +3,7 @@ import {assistantManagerAuth, memberAuth} from "../../middlewares/auth";
 import {imageUpload} from "../../utils/fileUpload";
 import SessionRequest from "../../entities/SessionRequest";
 import {
-    addBook, deleteSingleCopy, deleteWhole,
+    addBook, addExistingBook, deleteSingleCopy, deleteWhole,
     updateAuthors, updateBarcode,
     updateBookInfo,
     updateCoverPhoto,
@@ -93,6 +93,11 @@ booksController.delete("/single/:id", assistantManagerAuth, async (req: SessionR
 booksController.delete("/whole/:id", assistantManagerAuth, async (req: SessionRequest<{ id: string }>, res) => {
    await deleteWhole(req.params.id);
    res.status(200).json({message: "Given Book deleted successfully."});
+});
+
+booksController.post("/add-existing/:infoId", assistantManagerAuth, async (req: SessionRequest<{ infoId: string }>, res) => {
+   const {data, statusCode, error} = await addExistingBook(req.params.infoId, req.body);
+   res.status(statusCode).json(error ? error : data);
 });
 
 export default booksController;
