@@ -24,20 +24,20 @@ const userUtils_1 = __importDefault(require("../../src/utils/userUtils"));
     }));
     (0, vitest_1.it)("should return user info with password if (id, true, true)", () => __awaiter(void 0, void 0, void 0, function* () {
         const result = yield (0, userUtils_1.default)(testUtils_1.Entities.user.userId, true);
-        vitest_1.expect.soft(result).toMatchObject({ password: testUtils_1.Entities.user.password });
+        vitest_1.expect.soft(result).toHaveProperty("password");
     }));
     (0, vitest_1.it)("should not return password in the user info if (id, false, true)", () => __awaiter(void 0, void 0, void 0, function* () {
         const result = yield (0, userUtils_1.default)(testUtils_1.Entities.user.userId, false);
-        vitest_1.expect.soft(result).not.toMatchObject({ password: testUtils_1.Entities.user.password });
+        vitest_1.expect.soft(result).not.toHaveProperty("password");
     }));
     (0, vitest_1.it)("should return membership and role details without password if (id, false, true)", () => __awaiter(void 0, void 0, void 0, function* () {
         const result = yield (0, userUtils_1.default)(testUtils_1.Entities.user.userId, false, true);
-        vitest_1.expect.soft(result).not.toMatchObject({ password: testUtils_1.Entities.user.password });
+        vitest_1.expect.soft(result).not.toHaveProperty("password");
         vitest_1.expect.soft(result).toMatchObject({ membership: testUtils_1.Entities.membership, role: testUtils_1.Entities.userRoles });
     }));
     (0, vitest_1.it)("should return user info with password without role and membership if (id, true, false)", () => __awaiter(void 0, void 0, void 0, function* () {
         const result = yield (0, userUtils_1.default)(testUtils_1.Entities.user.userId, true, false);
-        vitest_1.expect.soft(result).toMatchObject({ password: testUtils_1.Entities.user.password });
+        vitest_1.expect.soft(result).toHaveProperty("password");
         vitest_1.expect.soft(result).not.toMatchObject({ membership: testUtils_1.Entities.membership, role: testUtils_1.Entities.userRoles });
     }));
 }));

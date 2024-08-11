@@ -9,7 +9,6 @@ const msg: {[key: string]: {error:string}} = {
     403: {error: "permission denied: you are not allowed here"}
 }
 
-
 const getSession = async(req: Request) => {
     const sessionCookie: string = req.cookies.sessionId;
     if (!sessionCookie) return null;

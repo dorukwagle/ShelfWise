@@ -15,15 +15,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const zod_1 = require("zod");
 const EnrollmentRequest_1 = __importDefault(require("./EnrollmentRequest"));
 const prismaClient_1 = __importDefault(require("../utils/prismaClient"));
+const dbValidation_1 = require("../utils/dbValidation");
 let currentUserId = "";
-const membershipTypeExists = (membershipTypeId) => __awaiter(void 0, void 0, void 0, function* () {
-    const membership = yield prismaClient_1.default.membershipTypes.findUnique({
-        where: {
-            membershipTypeId
-        }
-    });
-    return !!membership;
-});
+const membershipTypeExists = (membershipTypeId) => __awaiter(void 0, void 0, void 0, function* () { return (0, dbValidation_1.exists)("MembershipTypes", "membershipTypeId", membershipTypeId); });
 const uniqueEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield prismaClient_1.default.users.findFirst({
         where: {

@@ -24,6 +24,7 @@ const prismaClient_1 = __importDefault(require("../../src/utils/prismaClient"));
         yield (0, testUtils_1.clearUpSetup)();
     }));
     (0, vitest_1.it)("should save the session to the database and return it", () => __awaiter(void 0, void 0, void 0, function* () {
+        yield prismaClient_1.default.sessions.deleteMany();
         const sessionReturned = yield (0, authModel_1.createSession)(testUtils_1.Entities.user);
         const expectedSession = yield prismaClient_1.default.sessions.findFirst({
             where: {

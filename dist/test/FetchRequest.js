@@ -19,6 +19,10 @@ class FetchRequest {
             });
             return this;
         };
+        this.reset = () => {
+            this.options.body = null;
+            return this;
+        };
         this.setCookie = (name, value) => {
             this.options.headers.set('Cookie', `${name}=${value}`);
             return this;
@@ -36,18 +40,27 @@ class FetchRequest {
             this.options.headers = headers;
             return this;
         };
-        this.post = (...args_1) => __awaiter(this, [...args_1], void 0, function* (params = '', data) {
+        this.post = (...args_1) => __awaiter(this, [...args_1], void 0, function* (params = '', data, multipart = false) {
             this.options.method = "POST";
-            this.options.body = JSON.stringify(data || {});
+            this.options.body = multipart ? data : JSON.stringify(data || {});
             return fetch(`${this.getRoute()}/${params}`, this.options);
         });
-        this.get = (...args_1) => __awaiter(this, [...args_1], void 0, function* (params = '') {
+        this.get = (...args_1) => __awaiter(this, [...args_1], void 0, function* (params = '', query) {
             this.options.method = "GET";
-            return fetch(`${this.getRoute()}/${params}`, this.options);
+            let queryParams = {};
+            if (query === null || query === void 0 ? void 0 : query.page)
+                queryParams.page = query.page;
+            if (query === null || query === void 0 ? void 0 : query.pageSize)
+                queryParams.pageSize = query.pageSize;
+            if (query === null || query === void 0 ? void 0 : query.id)
+                queryParams.id = query.id;
+            if (query === null || query === void 0 ? void 0 : query.seed)
+                queryParams.seed = query.seed;
+            return fetch(`${this.getRoute()}/${params}${new URLSearchParams(queryParams)}`, this.options);
         });
         this.put = (...args_1) => __awaiter(this, [...args_1], void 0, function* (params = '', data) {
             this.options.method = "PUT";
-            this.options.body = JSON.stringify(data || []);
+            this.options.body = JSON.stringify(data || {});
             return fetch(`${this.getRoute()}/${params}`, this.options);
         });
         this.delete = (...args_1) => __awaiter(this, [...args_1], void 0, function* (params = '') {

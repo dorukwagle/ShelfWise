@@ -12,6 +12,9 @@ import {
     updatePurchase
 } from "./booksModel";
 import {BookInfoType} from "../../validations/BookInfo";
+import {findBooks, searchBooks} from "./booksQueryModel";
+import {BookFilterType} from "../../validations/BookFilter";
+import {FilterParamsType} from "../../validations/FilterParams";
 
 
 const booksController = express.Router();
@@ -26,8 +29,16 @@ const uploadHandler = (cb: RequestHandler) => {
     };
 };
 
-booksController.get("/", memberAuth, async (req, res) => {
+booksController.get("/search", memberAuth, async (req: SessionRequest<{}, any, any, BookFilterType>, res) => {
+    const {data, statusCode, info } = await searchBooks(req.query);
+    res.status(statusCode).json({data, info});
+});
 
+booksController.get("/find", assistantManagerAuth, async (req: SessionRequest<{}, any, any, FilterParamsType>, res) => {
+    if (!req.query.seed) return res.status(200).json([]);
+
+    const {data, statusCode, info } = await findBooks(req.query.seed, req.query);
+    res.status(statusCode).json({data, info});
 });
 
 booksController.post("/",

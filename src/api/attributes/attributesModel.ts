@@ -1,8 +1,12 @@
 import prismaClient from "../../utils/prismaClient";
-import {FilterParamsType} from "../../validations/FilterParams";
-import {getPaginatedItems} from "../../utils/paginator";
+import FilterParams, {FilterParamsType} from "../../validations/FilterParams";
+import {findRecord, getPaginatedItems} from "../../utils/paginator";
 import ModelReturnTypes from "../../entities/ModelReturnTypes";
 
+
+const getValidParams = (data: any) => {
+    return FilterParams.safeParse(data).data;
+}
 
 const genreExists = async (genreId: string) => {
     const genre = await prismaClient.genres.findUnique({where: {genreId}});
@@ -35,7 +39,18 @@ const getMembershipTypes = async () => {
 };
 
 const getGenres = async (genreParams: FilterParamsType) => {
-    return getPaginatedItems("genres", {id: "genreId", text: "genre"}, genreParams);
+    const data = getValidParams(genreParams);
+    if (data?.id) return findRecord("genres", {seed: data?.id, fields: [{column: "genreId"}]});
+
+    let whereArgs: any = null;
+
+    if (data?.seed)
+        whereArgs = {
+            fields: [{column: "genre"}],
+            seed: data?.seed,
+        };
+
+    return getPaginatedItems("genres", genreParams, whereArgs);
 };
 
 const addGenre = async (genreName: string) => {
@@ -83,7 +98,15 @@ const deleteGenre = async (genreId: string) => {
 }
 
 const getPublishers = async (publisherParams: FilterParamsType) => {
-    return getPaginatedItems("publishers", {id: "publisherId", text: "publisherName"}, publisherParams);
+    const data = getValidParams(publisherParams);
+    if (data?.id)
+        return findRecord("publishers", {fields: [{column: "publisherId"}], seed: data?.id});
+
+    let whereArgs: any = null;
+    if (data?.seed)
+        whereArgs = {fields: ["publisherName"], seed: data?.seed};
+
+    return getPaginatedItems("publishers", publisherParams, whereArgs);
 }
 
 const addPublisher = async (publisherName: string, address: string) => {
@@ -133,7 +156,15 @@ const deletePublisher = async (publisherId: string) => {
 }
 
 const getAuthors = async (authorParams: FilterParamsType) => {
-    return getPaginatedItems("authors", {id: "authorId", text: "fullName"}, authorParams);
+    const data = getValidParams(authorParams);
+    if (data?.id)
+        return findRecord("authors", {fields: [{column: "authorId"}], seed: data?.id});
+
+    let whereArgs: any = null;
+    if (data?.seed)
+        whereArgs = {fields: ["fullName"], seed: data?.seed};
+
+    return getPaginatedItems("authors", authorParams, whereArgs);
 }
 
 const addAuthor = async (title: string, authorName: string) => {

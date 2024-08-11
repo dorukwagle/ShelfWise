@@ -10,6 +10,19 @@ const databaseUrl = {
 const prismaClientInstance = () => {
     return new client_1.PrismaClient({
         datasourceUrl: databaseUrl[process.env.NODE_ENV || "development"],
+    })
+        .$extends({
+        query: {
+            $allModels: {
+                $allOperations({ model, operation, query, args }) {
+                    if (operation.includes("create"))
+                        return query(args);
+                    if (!operation.includes("delete")) // @ts-ignore
+                        args.where = Object.assign(Object.assign({}, args.where), { deletedAt: null });
+                    return query(args);
+                }
+            }
+        }
     });
 };
 const prismaClient = (_a = globalThis.prismaGlobal) !== null && _a !== void 0 ? _a : prismaClientInstance();

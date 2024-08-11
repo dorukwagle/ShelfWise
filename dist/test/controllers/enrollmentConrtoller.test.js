@@ -50,8 +50,7 @@ const enum_1 = require("../../src/constants/enum");
             return { session, enrollment };
         });
         const after = () => __awaiter(void 0, void 0, void 0, function* () {
-            yield prismaClient_1.default.sessions.deleteMany();
-            yield prismaClient_1.default.users.deleteMany();
+            yield (0, testUtils_1.clearUpSetup)();
         });
         return { before, after };
     };
@@ -205,7 +204,7 @@ const enum_1 = require("../../src/constants/enum");
             vitest_1.expect.soft(data).not.toHaveProperty("fullName");
             vitest_1.expect.soft(data).toHaveProperty("startDate");
         }));
-        (0, vitest_1.it)("should return 400 if invalid membership id is given", () => __awaiter(void 0, void 0, void 0, function* () {
+        (0, vitest_1.it)("should return 400 if invalid membership type id is given", () => __awaiter(void 0, void 0, void 0, function* () {
             const res = yield (0, testUtils_1.executeSafely)(() => req.setCookie("sessionId", session.session)
                 .post(enrollment.userId, enrollmentInvalidData));
             vitest_1.expect.soft(res).toBeTruthy();
@@ -225,27 +224,96 @@ const enum_1 = require("../../src/constants/enum");
         (0, vitest_1.it)("should create the new membership and assign it to the new user", () => __awaiter(void 0, void 0, void 0, function* () {
             enrollmentInvalidData.membershipTypeId = testUtils_1.Entities.membershipType.membershipTypeId;
             enrollmentInvalidData.email = enrollment.email;
-            // empty the memberhsip database
+            // empty the membership database
             yield prismaClient_1.default.memberships.deleteMany();
             const res = yield (0, testUtils_1.executeSafely)(() => req.setCookie("sessionId", session.session)
                 .post(enrollment.userId, enrollmentInvalidData));
             const database = yield prismaClient_1.default.memberships.findMany();
             vitest_1.expect.soft(res).toBeTruthy();
+            const data = yield res.json();
             vitest_1.expect.soft(database === null || database === void 0 ? void 0 : database.length).toBeTruthy();
             vitest_1.expect.soft(database[0]).toMatchObject({
-                startDate: enrollmentInvalidData.startDate,
-                expiryDate: enrollmentInvalidData.expiryDate,
+                startDate: new Date(enrollmentInvalidData.startDate),
+                expiryDate: new Date(enrollmentInvalidData.expiryDate),
             });
-            vitest_1.expect.soft(enrollment.membershipId).toBe(database[0].membershipId);
+            vitest_1.expect.soft(data.membership.membershipId).toBe(database[0].membershipId);
         }));
-        // should update the user info, if changed by admin
+        (0, vitest_1.it)("should update or change the enrollment info if given different value", () => __awaiter(void 0, void 0, void 0, function* () {
+            enrollmentInvalidData.membershipTypeId = testUtils_1.Entities.membershipType.membershipTypeId;
+            enrollmentInvalidData.email = "helloemail@gmail.com";
+            enrollmentInvalidData.fullName = "hello name";
+            const res = yield (0, testUtils_1.executeSafely)(() => req.setCookie("sessionId", session.session)
+                .post(enrollment.userId, enrollmentInvalidData));
+            const user = yield prismaClient_1.default.users.findUnique({
+                where: {
+                    userId: enrollment.userId
+                }
+            });
+            vitest_1.expect.soft(res).toBeTruthy();
+            vitest_1.expect.soft(user).toBeTruthy();
+            vitest_1.expect.soft(user.fullName).toBe(enrollmentInvalidData.fullName);
+            vitest_1.expect.soft(user.email).toBe(enrollmentInvalidData.email);
+        }));
     }));
-    //
-    // describe("/api/enrollments/enroll", async () => {
-    //     // should return 400 if invalid user details
-    //     // should return 400 if invalid membership details
-    //     // should create membership
-    //     // should activate user account
-    //     // should assign membership
-    // });
+    (0, vitest_1.describe)("/api/enrollments/enroll", () => __awaiter(void 0, void 0, void 0, function* () {
+        const req = new FetchRequest_1.default(`http://localhost:${testUtils_1.port}/api/enrollments/enroll`)
+            .setDefaultHeaders();
+        let session;
+        let enrollment;
+        let enrollmentInvalidData = {};
+        (0, vitest_1.beforeEach)(() => __awaiter(void 0, void 0, void 0, function* () {
+            const sessionEnrollment = yield createSessionAndEnrollment().before();
+            session = sessionEnrollment.session;
+            enrollment = sessionEnrollment.enrollment;
+            enrollmentInvalidData = Object.assign(Object.assign({}, enrollment), { "expiryDate": "2023-11-14", "startDate": "2022-11-14", "accountStatus": "Active", "membershipTypeId": (0, uuid_1.v7)() });
+        }));
+        (0, vitest_1.afterEach)(() => __awaiter(void 0, void 0, void 0, function* () {
+            yield createSessionAndEnrollment().after();
+        }));
+        (0, vitest_1.it)("should return validation error if user details is not given", () => __awaiter(void 0, void 0, void 0, function* () {
+            const res = yield (0, testUtils_1.executeSafely)(() => req.setCookie("sessionId", session.session)
+                .post());
+            vitest_1.expect.soft(res).toBeTruthy();
+            const data = yield res.json();
+            vitest_1.expect.soft(data).toHaveProperty("fullName");
+        }));
+        (0, vitest_1.it)("should return validation error if membership details is not given", () => __awaiter(void 0, void 0, void 0, function* () {
+            const res = yield (0, testUtils_1.executeSafely)(() => req.setCookie("sessionId", session.session)
+                .post('', Object.assign({}, enrollment)));
+            vitest_1.expect.soft(res).toBeTruthy();
+            const data = yield res.json();
+            vitest_1.expect.soft(data).toHaveProperty("startDate");
+            vitest_1.expect.soft(data).not.toHaveProperty("fullName");
+        }));
+        (0, vitest_1.it)("should return email exists error if duplicate email is given", () => __awaiter(void 0, void 0, void 0, function* () {
+            enrollmentInvalidData.email = testUtils_1.Entities.user.email;
+            const res = yield (0, testUtils_1.executeSafely)(() => req.setCookie("sessionId", session.session)
+                .post('', Object.assign({}, enrollmentInvalidData)));
+            vitest_1.expect.soft(res).toBeTruthy();
+            const data = yield res.json();
+            vitest_1.expect.soft(data).toHaveProperty("email");
+            vitest_1.expect.soft(data.email[0]).toContain("exist");
+        }));
+        (0, vitest_1.it)("should enroll the user, and save in the database if valid input", () => __awaiter(void 0, void 0, void 0, function* () {
+            yield prismaClient_1.default.users.delete({
+                where: {
+                    email: enrollmentInvalidData.email
+                }
+            });
+            const res = yield (0, testUtils_1.executeSafely)(() => req.setCookie("sessionId", session.session)
+                .post('', Object.assign(Object.assign({}, enrollmentInvalidData), { membershipTypeId: testUtils_1.Entities.membershipType.membershipTypeId })));
+            vitest_1.expect.soft(res).toBeTruthy();
+            const data = yield res.json();
+            const database = yield prismaClient_1.default.users.findUnique({
+                where: {
+                    email: enrollmentInvalidData.email
+                },
+                include: {
+                    membership: true
+                }
+            });
+            vitest_1.expect.soft(database).toBeTruthy();
+            vitest_1.expect.soft(data).toMatchObject(JSON.parse(JSON.stringify(database)));
+        }));
+    }));
 }));

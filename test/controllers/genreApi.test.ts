@@ -335,6 +335,7 @@ describe("Attributes", async () => {
             expect.soft(res!.status).toBe(200);
 
             const {data, info:{hasNextPage, itemsCount}} = await res!.json();
+
             expect.soft(data.length).toBe(authorParams.pageSize);
             expect.soft(hasNextPage).toBeTruthy();
             expect.soft(itemsCount).toBe(totalAuthors);

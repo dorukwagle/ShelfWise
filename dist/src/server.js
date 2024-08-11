@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const app_1 = __importDefault(require("./app"));
-const logging_1 = __importDefault(require("./startup/logging"));
+const logging_1 = __importDefault(require("./utils/logging"));
 const port = process.env.PORT || 3000;
 process.on('uncaughtException', (err) => {
     logging_1.default.error('Uncaught Exception', { message: err.message, stack: err.stack });

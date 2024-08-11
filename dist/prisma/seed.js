@@ -59,15 +59,7 @@ function main() {
                 },
             ]
         });
-        // seed membership table
-        const managerMembership = yield prismaClient_1.default.memberships.create({
-            data: {
-                startDate: new Date("2021-01-01"),
-                expiryDate: new Date("2022-01-01"),
-                membershipTypeId: employeeType.membershipTypeId
-            }
-        });
-        const user = yield prismaClient_1.default.users.create({
+        yield prismaClient_1.default.users.create({
             data: {
                 fullName: "Doruk Wagle",
                 email: "doruk.wagle@gmail.com",
@@ -80,8 +72,41 @@ function main() {
                 password: yield (0, hash_1.hashPassword)("manager123"),
                 accountStatus: "Active",
                 enrollmentYear: "2021",
-                membershipId: managerMembership.membershipId
+                membership: {
+                    create: {
+                        startDate: new Date("2021-01-01"),
+                        expiryDate: new Date("2022-01-01"),
+                        membershipTypeId: employeeType.membershipTypeId
+                    }
+                }
             }
+        });
+        yield prismaClient_1.default.globalAttributes.create({
+            data: {
+                issueValidityDays: 7,
+                membershipValidationMonths: 3,
+                penaltyPerDay: 10
+            }
+        });
+        yield prismaClient_1.default.genres.createMany({
+            data: [
+                { genre: "Thrill" },
+                { genre: "Supernatural" },
+                { genre: "Slice Of Life" },
+                { genre: "Sci-Fi" }
+            ]
+        });
+        yield prismaClient_1.default.authors.createMany({
+            data: [
+                { title: "Mr", fullName: "Dave Smart" },
+                { title: "Ms", fullName: "Christina Rossetti" }
+            ]
+        });
+        const publisher = yield prismaClient_1.default.publishers.createMany({
+            data: [
+                { publisherName: "Finland Publication", address: "finland" },
+                { publisherName: "Eastern Coast", address: "California" }
+            ]
         });
     });
 }

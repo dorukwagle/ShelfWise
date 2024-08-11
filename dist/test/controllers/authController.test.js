@@ -70,7 +70,7 @@ const uuid_1 = require("uuid");
             const res = yield (0, testUtils_1.executeSafely)(() => req.post("", validCredential));
             const data = yield res.json();
             vitest_1.expect.soft(res.status).toBe(200);
-            vitest_1.expect.soft(data).not.toMatchObject({ password: testUtils_1.Entities.user.password });
+            vitest_1.expect.soft(data).not.toHaveProperty("password");
         }));
         (0, vitest_1.it)("should return sessionId and return it if correct email & password is given", () => __awaiter(void 0, void 0, void 0, function* () {
             yield prismaClient_1.default.sessions.deleteMany();

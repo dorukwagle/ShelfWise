@@ -9,11 +9,13 @@ const authController_1 = __importDefault(require("../api/auth/authController"));
 const attributesController_1 = __importDefault(require("../api/attributes/attributesController"));
 const auth_1 = require("../middlewares/auth");
 const enrollmentController_1 = __importDefault(require("../api/enrollment/enrollmentController"));
+const booksController_1 = __importDefault(require("../api/books/booksController"));
 const initializeRoutes = (app) => {
     app.use((0, cookie_parser_1.default)());
     app.use("/api/attributes", attributesController_1.default);
     app.use("/api/me", auth_1.authorize, meController_1.default);
     app.use("/api/auth", authController_1.default);
     app.use("/api/enrollments", enrollmentController_1.default);
+    app.use("/api/books", booksController_1.default);
 };
 exports.default = initializeRoutes;

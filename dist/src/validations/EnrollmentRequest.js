@@ -8,28 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const zod_1 = require("zod");
-const prismaClient_1 = __importDefault(require("../utils/prismaClient"));
-const roleExists = (roleId) => __awaiter(void 0, void 0, void 0, function* () {
-    const role = yield prismaClient_1.default.userRoles.findUnique({
-        where: {
-            roleId: roleId
-        }
-    });
-    return !!role;
-});
-const uniqueEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield prismaClient_1.default.users.findUnique({
-        where: {
-            email: email
-        }
-    });
-    return !user;
-});
+const dbValidation_1 = require("../utils/dbValidation");
+const roleExists = (roleId) => __awaiter(void 0, void 0, void 0, function* () { return (0, dbValidation_1.exists)("userRoles", "roleId", roleId); });
+const uniqueEmail = (email) => __awaiter(void 0, void 0, void 0, function* () { return (0, dbValidation_1.unique)("users", "email", email); });
 const EnrollmentRequest = zod_1.z.object({
     fullName: zod_1.z.string({ required_error: "Full Name is required" })
         .refine(val => val.split(" ").length >= 2, "Please enter your full name"),

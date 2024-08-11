@@ -8,13 +8,13 @@ type Exclude = {column: string, value: any} | undefined;
 class BookInfoValidator {
     private exclude: Exclude;
 
-    private readonly uniqueClassNumber = async (cn: string, exclude: Exclude=undefined) => unique("bookInfo", "classNumber", cn, exclude);
+    private readonly uniqueClassNumber = async (cn: string, exclude?: Exclude) => unique("bookInfo", "classNumber", cn, exclude);
 
-    private readonly uniqueBookNumber = async  (bookNumber: string, exclude: Exclude=undefined) => unique("bookInfo", "bookNumber", bookNumber, exclude);
+    private readonly uniqueBookNumber = async  (bookNumber: string, exclude?: Exclude) => unique("bookInfo", "bookNumber", bookNumber, exclude);
 
-    private readonly publisherExists = async (publisherId: string, exclude:Exclude=undefined) => exists("publishers", "publisherId", publisherId, exclude);
+    private readonly publisherExists = async (publisherId: string, exclude?:Exclude) => exists("publishers", "publisherId", publisherId, exclude);
 
-    private readonly eachBookAuthorsExists = async (authorIds: string[], exclude:Exclude=undefined) => {
+    private readonly eachBookAuthorsExists = async (authorIds: string[], exclude?:Exclude) => {
         if (hasDuplicates(authorIds)) return false;
 
         for (const authorId of authorIds) {
@@ -26,7 +26,7 @@ class BookInfoValidator {
         return true;
     }
 
-    private readonly eachUniqueIsbn = async (isbns: string[], exclude:Exclude=undefined) => {
+    private readonly eachUniqueIsbn = async (isbns: string[], exclude?:Exclude) => {
         if (hasDuplicates(isbns)) return false;
 
         for (const isbn of isbns) {
@@ -38,7 +38,7 @@ class BookInfoValidator {
         return true;
     }
 
-    private readonly eachBookGenreExists = async (genreIds: string[], exclude:Exclude=undefined) => {
+    private readonly eachBookGenreExists = async (genreIds: string[], exclude?:Exclude) => {
         if (hasDuplicates(genreIds)) return false;
 
         for (const genreId of genreIds) {
@@ -50,7 +50,7 @@ class BookInfoValidator {
         return true;
     }
 
-    private readonly eachUniqueBarcode = async (barcodes: string[], exclude:Exclude=undefined) => {
+    private readonly eachUniqueBarcode = async (barcodes: string[], exclude?:Exclude) => {
         if (hasDuplicates(barcodes)) return false;
 
         for (const barcode of barcodes) {
@@ -116,32 +116,32 @@ class BookInfoValidator {
         barcodes: true
     });
 
-    public readonly BookInfo = (exclude: Exclude = undefined) => {
+    public readonly BookInfo = (exclude?: Exclude) => {
         this.exclude = exclude;
         return this.BookInfoSchema;
     };
 
-    public readonly BookInfoOnly = (exclude: Exclude = undefined) => {
+    public readonly BookInfoOnly = (exclude?: Exclude) => {
         this.exclude = exclude;
         return this.BookInfoOnlySchema;
     };
 
-    public readonly BookGenresOnly = (exclude: Exclude = undefined) => {
+    public readonly BookGenresOnly = (exclude?: Exclude) => {
         this.exclude = exclude;
         return this.BookGenresOnlySchema;
     };
 
-    public readonly BookAuthorsOnly = (exclude: Exclude = undefined) => {
+    public readonly BookAuthorsOnly = (exclude?: Exclude) => {
         this.exclude = exclude;
         return this.BookAuthorsOnlySchema;
     };
 
-    public readonly BookPurchaseOnly = (exclude: Exclude = undefined) => {
+    public readonly BookPurchaseOnly = (exclude?: Exclude) => {
         this.exclude = exclude;
         return this.BookPurchaseOnlySchema;
     };
 
-    public readonly ISBNsOnly = (exclude: Exclude = undefined) => {
+    public readonly ISBNsOnly = (exclude?: Exclude) => {
         this.exclude = exclude;
         return this.ISBNsOnlySchema;
     };

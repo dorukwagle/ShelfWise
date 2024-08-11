@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.destroySession = exports.createSession = exports.authenticate = void 0;
+exports.destroyAllSessions = exports.destroySession = exports.createSession = exports.authenticate = void 0;
 const hash_1 = require("../../utils/hash");
 const uuid_1 = require("uuid");
 const userUtils_1 = __importDefault(require("../../utils/userUtils"));
@@ -63,3 +63,4 @@ const destroyAllSessions = (session) => __awaiter(void 0, void 0, void 0, functi
     });
     return true;
 });
+exports.destroyAllSessions = destroyAllSessions;

@@ -8,7 +8,8 @@ require("express-async-errors");
 const cors_1 = __importDefault(require("cors"));
 const routes_1 = __importDefault(require("./startup/routes"));
 const errorHandler_1 = __importDefault(require("./middlewares/errorHandler"));
-const routesLogger_1 = __importDefault(require("./startup/routesLogger"));
+const routesLogger_1 = __importDefault(require("./utils/routesLogger"));
+require("./utils/bigintSerializer");
 const app = (0, express_1.default)();
 if (process.env.NODE_ENV === "development") {
     app.use((0, cors_1.default)({
