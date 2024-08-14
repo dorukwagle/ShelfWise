@@ -1,5 +1,6 @@
 import {FilterParamsType} from "../src/validations/FilterParams";
 import {RequestOptions} from "node:http";
+import {BookFilterType} from "../src/validations/BookFilter";
 // import fetch, {RequestInit} from "node-fetch";
 
 interface Options {
@@ -60,13 +61,14 @@ class FetchRequest {
         return fetch(`${this.getRoute()}/${params}`, this.options as RequestInit);
     }
 
-    get = async (params: string = '', query?: FilterParamsType) => {
+    get = async (params: string = '', query?: FilterParamsType & BookFilterType) => {
         this.options.method = "GET";
-        let queryParams:any = {};
-        if (query?.page) queryParams.page = query.page;
-        if (query?.pageSize) queryParams.pageSize = query.pageSize;
-        if (query?.id) queryParams.id = query.id;
-        if (query?.seed) queryParams.seed = query.seed;
+        let queryParams:{[key: string]: any} = {};
+
+        Object.keys(query || {}).forEach((key: string) => {
+            // @ts-ignore
+            queryParams[key] = query[key];
+        });
         return fetch(`${this.getRoute()}/${params}${new URLSearchParams(queryParams)}`, this.options as RequestInit);
     }
 

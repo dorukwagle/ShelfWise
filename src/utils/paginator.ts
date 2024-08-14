@@ -6,7 +6,7 @@ import prismaClient from "./prismaClient";
 type model = "genres" | "publishers" | "authors" | "bookInfo";
 
 export type WhereArgs = {
-    fields: {column: string, child?: string, search?: boolean, seed?: any}[],
+    fields: {column: string, child?: string, search?: boolean, seed?: any, oneToMany?: boolean}[],
     defaultSeed: string | number | BigInt;
 }
 
@@ -22,7 +22,7 @@ const fetchById = async ({res, model, whereArgs}: Args) => {
     // @ts-ignore
     res.data = (await prismaClient[model].findUnique({
         where: {
-            [fields![0].column]: defaultSeed
+            [fields![0].column]: fields[0].seed ? fields[0].seed : defaultSeed
         }
     })) || [];
     return res;
@@ -37,24 +37,30 @@ const paginateItems = async (page: number, size: number,
     if (includes?.length)
         includes.forEach(item => include[item] = true);
 
-    if (whereArgs?.fields) {
-        whereArgs.fields.forEach(item => where[item.column] = item.child ?
-            {[item.child]: {[item.search ? "search" : "contains"]: [item.seed ? item.seed : whereArgs.defaultSeed]}} :
-            {[item.search ? "search" : "contains"]: [item.seed ? item.seed : whereArgs.defaultSeed]}
-        );
+    if (whereArgs?.fields.length) {
+        whereArgs.fields.forEach(item => {
+            const relationFilter = {[item.child!]: {[item.search ? "search" : "contains"]:
+                    item.seed ? item.seed : whereArgs.defaultSeed}};
+            const itemFilter =
+                {[item.search ? "search" : "contains"]: item.seed ? item.seed : whereArgs.defaultSeed};
+
+            where[item.column] = item.child ?
+                (item.oneToMany ? {every: relationFilter} : relationFilter) : itemFilter;
+        });
     }
 
     if (sort)
         orderBy = sort;
 
-    // @ts-ignore
-    res.data = await prismaClient[model].findMany({
+    const query = {
         skip: Math.abs((page - 1) * size),
         take: size,
         where,
         include,
         orderBy
-    });
+    };
+    // @ts-ignore
+    res.data = await prismaClient[model].findMany(query);
 
     // @ts-ignore
     const itemsCount = await prismaClient[model].count({

@@ -40,14 +40,14 @@ const getMembershipTypes = async () => {
 
 const getGenres = async (genreParams: FilterParamsType) => {
     const data = getValidParams(genreParams);
-    if (data?.id) return findRecord("genres", {seed: data?.id, fields: [{column: "genreId"}]});
+    if (data?.id) return findRecord("genres", {defaultSeed: data?.id, fields: [{column: "genreId"}]});
 
     let whereArgs: any = null;
 
     if (data?.seed)
         whereArgs = {
             fields: [{column: "genre"}],
-            seed: data?.seed,
+            defaultSeed: data.seed,
         };
 
     return getPaginatedItems("genres", genreParams, whereArgs);
@@ -100,7 +100,7 @@ const deleteGenre = async (genreId: string) => {
 const getPublishers = async (publisherParams: FilterParamsType) => {
     const data = getValidParams(publisherParams);
     if (data?.id)
-        return findRecord("publishers", {fields: [{column: "publisherId"}], seed: data?.id});
+        return findRecord("publishers", {fields: [{column: "publisherId"}], defaultSeed: data?.id});
 
     let whereArgs: any = null;
     if (data?.seed)
@@ -158,7 +158,7 @@ const deletePublisher = async (publisherId: string) => {
 const getAuthors = async (authorParams: FilterParamsType) => {
     const data = getValidParams(authorParams);
     if (data?.id)
-        return findRecord("authors", {fields: [{column: "authorId"}], seed: data?.id});
+        return findRecord("authors", {fields: [{column: "authorId"}], defaultSeed: data?.id});
 
     let whereArgs: any = null;
     if (data?.seed)

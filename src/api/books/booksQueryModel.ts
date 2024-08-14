@@ -8,22 +8,22 @@ const getSortType = (sort: BookSortType | undefined) => {
     if (!sort) return undefined;
 
     if (sort === "added_date_asc")
-        return ({orderBy: {addedDate: "asc"}});
+        return ({addedDate: "asc"});
 
     if (sort === "added_date_desc")
-        return ({orderBy: {addedDate: "desc"}});
+        return ({addedDate: "desc"});
 
     if (sort === "pub_date_asc")
-        return ({orderBy: {publicationYear: "desc"}});
+        return ({publicationYear: "desc"});
 
     if (sort === "pub_date_desc")
-        return ({orderBy: {publicationYear: "desc"}});
+        return ({publicationYear: "desc"});
 
     if (sort === "ratings_asc")
-        return ({orderBy: {rating: {score: "asc"}}});
+        return ({rating: {score: "asc"}});
 
     if (sort === "ratings_desc")
-        return ({orderBy: {rating: {score: "desc"}}});
+        return ({rating: {score: "desc"}});
 
     return undefined;
 };
@@ -45,11 +45,11 @@ const getFilter = (filter: BookFilterType): WhereArgs => {
     }
 
     if (genre)
-        whereArgs.fields.push({column: "bookGenres", child: "genreId", seed: genre});
+        whereArgs.fields.push({column: "bookGenres", child: "genreId", seed: genre, oneToMany: true});
     if (publisher)
         whereArgs.fields.push({column: "publisherId", seed: publisher});
     if (author)
-        whereArgs.fields.push({column: "bookAuthors", child: "authorId", seed: author});
+        whereArgs.fields.push({column: "bookAuthors", child: "authorId", seed: author, oneToMany: true});
 
     return whereArgs;
 };
@@ -58,7 +58,7 @@ const searchBooks = async (query: BookFilterType) => {
     const res = {statusCode: 200, info: {hasNextPage: false, itemsCount: 0}, data: {}} as PaginationReturnTypes;
 
     const valid = BookFilter.safeParse(query);
-    if (!valid.error?.isEmpty) return res;
+    if (valid.error && !valid.error.isEmpty) return res;
 
     const filter = valid.data! as BookFilterType;
 
@@ -79,9 +79,7 @@ const searchBooks = async (query: BookFilterType) => {
             }
         };
 
-    res.data = await getPaginatedItems("bookInfo", pageParams, whereArgs, include, sorting);
-
-    return res;
+    return await getPaginatedItems("bookInfo", pageParams, whereArgs, include, sorting);
 };
 
 const findBooks = async (seed: string, params: FilterParamsType) => {

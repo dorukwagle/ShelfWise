@@ -29,7 +29,7 @@ const uploadHandler = (cb: RequestHandler) => {
     };
 };
 
-booksController.get("/search", memberAuth, async (req: SessionRequest<{}, any, any, BookFilterType>, res) => {
+booksController.get("/", memberAuth, async (req: SessionRequest<{}, any, any, BookFilterType>, res) => {
     const {data, statusCode, info } = await searchBooks(req.query);
     res.status(statusCode).json({data, info});
 });
