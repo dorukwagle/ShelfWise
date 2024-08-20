@@ -17,32 +17,54 @@ const FilterParams_1 = __importDefault(require("../validations/FilterParams"));
 const constants_1 = require("../constants/constants");
 const prismaClient_1 = __importDefault(require("./prismaClient"));
 const fetchById = (_a) => __awaiter(void 0, [_a], void 0, function* ({ res, model, whereArgs }) {
-    const { fields, seed } = whereArgs;
+    const { fields, defaultSeed } = whereArgs;
     // @ts-ignore
     res.data = (yield prismaClient_1.default[model].findUnique({
         where: {
-            [fields[0].column]: seed
+            [fields[0].column]: fields[0].seed ? fields[0].seed : defaultSeed
         }
     })) || [];
     return res;
 });
-const paginateItems = (page_1, size_1, _a, includes_1) => __awaiter(void 0, [page_1, size_1, _a, includes_1], void 0, function* (page, size, { res, model, whereArgs }, includes) {
-    const where = {};
+const paginateItems = (page_1, size_1, _a, includes_1, sort_1) => __awaiter(void 0, [page_1, size_1, _a, includes_1, sort_1], void 0, function* (page, size, { res, model, whereArgs }, includes, sort) {
+    const where = [];
     const include = {};
+    let orderBy = {};
     if (includes === null || includes === void 0 ? void 0 : includes.length)
         includes.forEach(item => include[item] = true);
-    if (whereArgs === null || whereArgs === void 0 ? void 0 : whereArgs.fields) {
-        whereArgs.fields.forEach(item => where[item.column] = item.child ?
-            { [item.child]: { [item.search ? "search" : "contains"]: whereArgs.seed } } :
-            { contains: whereArgs.seed });
+    if (whereArgs === null || whereArgs === void 0 ? void 0 : whereArgs.fields.length) {
+        whereArgs.fields.forEach(item => {
+            let seed = item.seed || whereArgs.defaultSeed;
+            if (item.number)
+                seed = Number(seed);
+            const relationFilter = {
+                [item.child]: {
+                    [item.search ? "search" : "contains"]: seed
+                }
+            };
+            const itemFilter = item.number ? { equals: seed } :
+                { [item.search ? "search" : "contains"]: seed };
+            const whereObj = {};
+            whereObj[item.column] = item.child ?
+                (item.oneToMany ? { every: relationFilter } : relationFilter) : itemFilter;
+            where.push(whereObj);
+        });
     }
-    // @ts-ignore
-    res.data = yield prismaClient_1.default[model].findMany({
+    if (sort)
+        orderBy = sort;
+    const operator = (whereArgs === null || whereArgs === void 0 ? void 0 : whereArgs.operator) || "And";
+    const query = {
         skip: Math.abs((page - 1) * size),
         take: size,
-        where,
-        include
-    });
+        where: {
+            [operator === "And" ? "AND" : "OR"]: where
+        },
+        include,
+        orderBy
+    };
+    console.log(query.where);
+    // @ts-ignore
+    res.data = yield prismaClient_1.default[model].findMany(query);
     // @ts-ignore
     const itemsCount = yield prismaClient_1.default[model].count({
         where
@@ -53,14 +75,14 @@ const paginateItems = (page_1, size_1, _a, includes_1) => __awaiter(void 0, [pag
     };
     return res;
 });
-const getPaginatedItems = (model, filterParams, whereArgs, includes) => __awaiter(void 0, void 0, void 0, function* () {
+const getPaginatedItems = (model, filterParams, whereArgs, includes, sort) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const res = { statusCode: 200 };
     const validation = FilterParams_1.default.safeParse(filterParams);
     const page = ((_a = validation.data) === null || _a === void 0 ? void 0 : _a.page) || 1;
     const pageSize = ((_b = validation.data) === null || _b === void 0 ? void 0 : _b.pageSize) || constants_1.DEFAULT_PAGE_SIZE;
     const args = { res, model, whereArgs };
-    return yield paginateItems(page, pageSize, args, includes);
+    return yield paginateItems(page, pageSize, args, includes, sort);
 });
 exports.getPaginatedItems = getPaginatedItems;
 const findRecord = (model, whereArgs) => __awaiter(void 0, void 0, void 0, function* () {

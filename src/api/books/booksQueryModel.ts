@@ -14,7 +14,7 @@ const getSortType = (sort: BookSortType | undefined) => {
         return ({addedDate: "desc"});
 
     if (sort === "pub_date_asc")
-        return ({publicationYear: "desc"});
+        return ({publicationYear: "asc"});
 
     if (sort === "pub_date_desc")
         return ({publicationYear: "desc"});
@@ -78,7 +78,6 @@ const searchBooks = async (query: BookFilterType) => {
                 sort: "desc"
             }
         };
-
     return await getPaginatedItems("bookInfo", pageParams, whereArgs, include, sorting);
 };
 
@@ -86,23 +85,14 @@ const findBooks = async (seed: string, params: FilterParamsType) => {
     const whereArgs = {
         defaultSeed: seed,
         fields: [
-            {column: "classNumber"},
-            {column: "bookNumber"},
-            {column: "title", search: true},
-            {column: "subTitle", search: true},
-            {column: "editionStatement"},
-            {column: "numberOfPages"},
-            {column: "publicationYear"},
-            {column: "seriesStatement"},
-            {column: "addedDate"},
-            {column: "isbns", child: "isbn"},
-            {column: "books", child: "barcode"},
+            {column: "isbns", child: "isbn", oneToMany: true},
+            {column: "books", child: "barcode", oneToMany: true},
             {column: "publisher", child: "publisherName"}
-        ]
+        ],
     };
     const includes = ["isbns", "books", "publisher"];
 
-    return getPaginatedItems("bookInfo", params, whereArgs, includes);
+    return getPaginatedItems("bookInfo", params, {...whereArgs, operator: "OR"}, includes);
 }
 
 export {

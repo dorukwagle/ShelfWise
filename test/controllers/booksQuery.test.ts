@@ -11,6 +11,7 @@ import {
 import FetchRequest from "../FetchRequest";
 import {DEFAULT_PAGE_SIZE} from "../../src/constants/constants";
 import prismaClient from "../../src/utils/prismaClient";
+import author from "../../src/validations/Author";
 
 describe("Books Query", async () => {
     beforeAll(async () => {
@@ -108,7 +109,8 @@ describe("Books Query", async () => {
 
             const res = await executeSafely(() => req.get("?", {
                 author, genre, publisher,
-                sort: "pub_date_asc"
+                sort: "pub_date_desc",
+                seed: "test"
             }));
 
             const {data} = await res!.json();
@@ -116,28 +118,57 @@ describe("Books Query", async () => {
             expect.soft(data.length).toBeTruthy();
 
             for (let i = 1; i < data.length; i++) {
-                const date1 = new Date(data[i].publicationYear);
-                const date2 = new Date(data[i - 1].publicationYear);
-                expect.soft(date2 > date1);
+                const date1 = data[i].publicationYear;
+                const date2 = data[i - 1].publicationYear;
+                expect.soft(date2 > date1).toBeTruthy();
             }
 
             data.forEach((book: any) => {
                 expect.soft(book.bookAuthors[0].authorId).toBe(author);
                 expect.soft(book.bookGenres[0].genreId).toBe(genre);
                 expect.soft(book.publisher.publisherId).toBe(publisher);
-                expect.soft((book.title + book.subTitle).toLowerCase()).toContain("");
+                expect.soft((book.title + book.subTitle).toLowerCase()).toContain("test");
             });
 
         });
     });
 
     describe("GET /api/books/find", async () => {
-        it("should return books with given number of pages", async () => {
+        const req = new FetchRequest(`http://localhost:${port}/api/books/find`)
+            .setDefaultHeaders();
 
+        beforeAll(async () => {
+            req.setCookie("sessionId", Entities.session.session);
         });
 
-        it("should return books with given barcode", async () => {
+        it("should return books with given number of pages", async () => {
+            const res = await executeSafely(() => req.get("?", {
+                seed: 'Pearson'
+            }));
 
+            const {data} = await res!.json();
+            expect.soft(res!.status).toBe(200);
+            expect.soft(data.length).toBeTruthy();
+
+            data.forEach((book: any) => {
+                expect.soft(book.publisher.publisherName).toContain('Pearson');
+            });
+        });
+
+        it("should return books with given isbn", async () => {
+            const isbn = "978-0061120084"; //from testUtils.ts
+
+            const res = await executeSafely(() => req.get("?", {
+                seed: isbn
+            }));
+
+            const {data} = await res!.json();
+            expect.soft(res!.status).toBe(200);
+            expect.soft(data.length).toBeTruthy();
+
+            data.forEach((book: any) => {
+                expect.soft(book.isbns[0].isbn).toContain(isbn);
+            });
         });
     });
 });

@@ -6,14 +6,15 @@ import prismaClient from "./prismaClient";
 type model = "genres" | "publishers" | "authors" | "bookInfo";
 
 export type WhereArgs = {
-    fields: {column: string, child?: string, search?: boolean, seed?: any, oneToMany?: boolean}[],
+    fields: { column: string, child?: string, search?: boolean, seed?: any, oneToMany?: boolean, number?: boolean }[],
     defaultSeed: string | number | BigInt;
+    operator?: "AND" | "OR";
 }
 
 interface Args {
     res: PaginationReturnTypes;
     model: model;
-    whereArgs: WhereArgs | undefined;
+    whereArgs?: WhereArgs;
 }
 
 const fetchById = async ({res, model, whereArgs}: Args) => {
@@ -30,41 +31,57 @@ const fetchById = async ({res, model, whereArgs}: Args) => {
 
 const paginateItems = async (page: number, size: number,
                              {res, model, whereArgs}: Args, includes?: string[], sort?: {}) => {
-    const where: {[key: string]: any} = {};
-    const include:{[key: string]: any} = {};
+    const where: { [key: string]: any }[] = [];
+    const include: { [key: string]: any } = {};
     let orderBy: any = {};
 
     if (includes?.length)
         includes.forEach(item => include[item] = true);
+        const operator = whereArgs?.operator || "AND";
 
     if (whereArgs?.fields.length) {
         whereArgs.fields.forEach(item => {
-            const relationFilter = {[item.child!]: {[item.search ? "search" : "contains"]:
-                    item.seed ? item.seed : whereArgs.defaultSeed}};
-            const itemFilter =
-                {[item.search ? "search" : "contains"]: item.seed ? item.seed : whereArgs.defaultSeed};
+            let seed = item.seed || whereArgs.defaultSeed;
+            if (item.number) seed = Number(seed);
 
-            where[item.column] = item.child ?
-                (item.oneToMany ? {every: relationFilter} : relationFilter) : itemFilter;
+            const relationFilter = {
+                [item.child!]: {
+                    [item.search ? "search" : "contains"]:
+                    seed
+                }
+            };
+            const itemFilter = item.number ? {equals: seed} :
+                {[item.search ? "search" : "contains"]: seed};
+
+            const whereObj: { [key: string]: any } = {};
+            whereObj[item.column] = item.child ?
+                (item.oneToMany ? {[operator === "AND" ? "every" : "some"]: relationFilter} : relationFilter) : itemFilter;
+
+            where.push(whereObj);
         });
     }
 
     if (sort)
         orderBy = sort;
 
+    const whereWithOperator = {
+        [operator]: where
+    };
+
     const query = {
         skip: Math.abs((page - 1) * size),
         take: size,
-        where,
+        where: whereWithOperator,
         include,
         orderBy
     };
+
     // @ts-ignore
     res.data = await prismaClient[model].findMany(query);
 
     // @ts-ignore
     const itemsCount = await prismaClient[model].count({
-        where
+        where: whereWithOperator
     });
 
     res.info = {

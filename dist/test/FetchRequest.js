@@ -48,14 +48,10 @@ class FetchRequest {
         this.get = (...args_1) => __awaiter(this, [...args_1], void 0, function* (params = '', query) {
             this.options.method = "GET";
             let queryParams = {};
-            if (query === null || query === void 0 ? void 0 : query.page)
-                queryParams.page = query.page;
-            if (query === null || query === void 0 ? void 0 : query.pageSize)
-                queryParams.pageSize = query.pageSize;
-            if (query === null || query === void 0 ? void 0 : query.id)
-                queryParams.id = query.id;
-            if (query === null || query === void 0 ? void 0 : query.seed)
-                queryParams.seed = query.seed;
+            Object.keys(query || {}).forEach((key) => {
+                // @ts-ignore
+                queryParams[key] = query[key];
+            });
             return fetch(`${this.getRoute()}/${params}${new URLSearchParams(queryParams)}`, this.options);
         });
         this.put = (...args_1) => __awaiter(this, [...args_1], void 0, function* (params = '', data) {

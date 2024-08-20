@@ -14,96 +14,86 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findBooks = exports.searchBooks = void 0;
 const BookFilter_1 = __importDefault(require("../../validations/BookFilter"));
-const prismaClient_1 = __importDefault(require("../../utils/prismaClient"));
-const constants_1 = require("../../constants/constants");
 const paginator_1 = require("../../utils/paginator");
 const getSortType = (sort) => {
     if (!sort)
-        return null;
+        return undefined;
     if (sort === "added_date_asc")
-        return ({ orderBy: { addedDate: "asc" } });
+        return ({ addedDate: "asc" });
     if (sort === "added_date_desc")
-        return ({ orderBy: { addedDate: "desc" } });
+        return ({ addedDate: "desc" });
     if (sort === "pub_date_asc")
-        return ({ orderBy: { publicationYear: "desc" } });
+        return ({ publicationYear: "asc" });
     if (sort === "pub_date_desc")
-        return ({ orderBy: { publicationYear: "desc" } });
+        return ({ publicationYear: "desc" });
     if (sort === "ratings_asc")
-        return ({ orderBy: { rating: { score: "asc" } } });
+        return ({ rating: { score: "asc" } });
     if (sort === "ratings_desc")
-        return ({ orderBy: { rating: { score: "desc" } } });
-    return null;
+        return ({ rating: { score: "desc" } });
+    return undefined;
 };
-const searchBooks = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const res = { statusCode: 200, info: { hasNextPage: false, itemsCount: 0 }, data: {} };
-    const valid = BookFilter_1.default.safeParse(query);
-    if (!((_a = valid.error) === null || _a === void 0 ? void 0 : _a.isEmpty))
-        return res;
-    const filter = valid.data;
-    const page = filter.page || 1;
-    const pageSize = filter.pageSize || constants_1.DEFAULT_PAGE_SIZE;
+const getFilter = (filter) => {
     const seed = filter.seed;
     const genre = filter.genre;
     const publisher = filter.publisher;
     const author = filter.author;
+    const whereArgs = { fields: [], defaultSeed: '' };
+    if (seed) {
+        whereArgs.fields = [
+            ...(whereArgs.fields || []),
+            { column: "title", search: true, seed: seed },
+            { column: "subTitle", search: true, seed: seed },
+        ];
+    }
+    if (genre)
+        whereArgs.fields.push({ column: "bookGenres", child: "genreId", seed: genre, oneToMany: true });
+    if (publisher)
+        whereArgs.fields.push({ column: "publisherId", seed: publisher });
+    if (author)
+        whereArgs.fields.push({ column: "bookAuthors", child: "authorId", seed: author, oneToMany: true });
+    return whereArgs;
+};
+const searchBooks = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const res = { statusCode: 200, info: { hasNextPage: false, itemsCount: 0 }, data: {} };
+    const valid = BookFilter_1.default.safeParse(query);
+    if (valid.error && !valid.error.isEmpty)
+        return res;
+    const filter = valid.data;
+    const seed = filter.seed;
     const sort = filter.sort;
-    const sorting = getSortType(sort);
-    let searchObj = {
-        skip: Math.abs((page - 1) * pageSize),
-        take: pageSize,
-        include: {
-            publisher: true,
-            ratings: true,
-            bookGenres: true,
-            bookAuthors: true
-        },
-        where: {}
-    };
+    let sorting = getSortType(sort);
+    const include = ["publisher", "ratings", "bookGenres", "bookAuthors"];
+    const pageParams = { page: filter.page, pageSize: filter.pageSize };
+    const whereArgs = getFilter(filter);
     if (seed && !sorting)
-        searchObj.orderBy = {
+        sorting = {
             _relevance: {
                 fields: ["title", 'subTitle'],
                 search: seed,
                 sort: "desc"
             }
         };
-    if (seed && sorting) {
-        searchObj.where = {
-            title: { search: seed },
-            subTitle: { search: seed }
-        };
-        searchObj = Object.assign(Object.assign({}, searchObj), sorting);
-    }
-    if (genre)
-        searchObj.where = Object.assign(Object.assign({}, searchObj.where), { bookGenres: { genreId: genre } });
-    if (publisher)
-        searchObj.where = Object.assign(Object.assign({}, searchObj.where), { publisherId: publisher });
-    if (author)
-        searchObj.where = Object.assign(Object.assign({}, searchObj.where), { bookAuthors: { authorId: author } });
-    res.data = yield prismaClient_1.default.bookInfo.findMany(Object.assign({}, searchObj));
-    return res;
+    return yield (0, paginator_1.getPaginatedItems)("bookInfo", pageParams, whereArgs, include, sorting);
 });
 exports.searchBooks = searchBooks;
 const findBooks = (seed, params) => __awaiter(void 0, void 0, void 0, function* () {
     const whereArgs = {
-        seed: seed,
+        defaultSeed: seed,
         fields: [
             { column: "classNumber" },
             { column: "bookNumber" },
             { column: "title", search: true },
             { column: "subTitle", search: true },
             { column: "editionStatement" },
-            { column: "numberOfPages" },
-            { column: "publicationYear" },
+            { column: "numberOfPages", number: true },
+            { column: "publicationYear", number: true },
             { column: "seriesStatement" },
-            { column: "addedDate" },
-            { column: "isbns", child: "isbn" },
-            { column: "books", child: "barcode" },
+            { column: "isbns", child: "isbn", oneToMany: true },
+            { column: "books", child: "barcode", oneToMany: true },
             { column: "publisher", child: "publisherName" }
-        ]
+        ],
     };
     const includes = ["isbns", "books", "publisher"];
-    return (0, paginator_1.getPaginatedItems)("bookInfo", params, whereArgs, includes);
+    return (0, paginator_1.getPaginatedItems)("bookInfo", params, Object.assign(Object.assign({}, whereArgs), { operator: "AND" }), includes);
 });
 exports.findBooks = findBooks;

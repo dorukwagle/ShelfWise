@@ -48,12 +48,12 @@ exports.getMembershipTypes = getMembershipTypes;
 const getGenres = (genreParams) => __awaiter(void 0, void 0, void 0, function* () {
     const data = getValidParams(genreParams);
     if (data === null || data === void 0 ? void 0 : data.id)
-        return (0, paginator_1.findRecord)("genres", { seed: data === null || data === void 0 ? void 0 : data.id, fields: [{ column: "genreId" }] });
+        return (0, paginator_1.findRecord)("genres", { defaultSeed: data === null || data === void 0 ? void 0 : data.id, fields: [{ column: "genreId" }] });
     let whereArgs = null;
     if (data === null || data === void 0 ? void 0 : data.seed)
         whereArgs = {
-            fields: ["genre"],
-            seed: data === null || data === void 0 ? void 0 : data.seed,
+            fields: [{ column: "genre" }],
+            defaultSeed: data.seed,
         };
     return (0, paginator_1.getPaginatedItems)("genres", genreParams, whereArgs);
 });
@@ -102,7 +102,7 @@ exports.deleteGenre = deleteGenre;
 const getPublishers = (publisherParams) => __awaiter(void 0, void 0, void 0, function* () {
     const data = getValidParams(publisherParams);
     if (data === null || data === void 0 ? void 0 : data.id)
-        return (0, paginator_1.findRecord)("publishers", { fields: [{ column: "publisherId" }], seed: data === null || data === void 0 ? void 0 : data.id });
+        return (0, paginator_1.findRecord)("publishers", { fields: [{ column: "publisherId" }], defaultSeed: data === null || data === void 0 ? void 0 : data.id });
     let whereArgs = null;
     if (data === null || data === void 0 ? void 0 : data.seed)
         whereArgs = { fields: ["publisherName"], seed: data === null || data === void 0 ? void 0 : data.seed };
@@ -155,7 +155,7 @@ exports.deletePublisher = deletePublisher;
 const getAuthors = (authorParams) => __awaiter(void 0, void 0, void 0, function* () {
     const data = getValidParams(authorParams);
     if (data === null || data === void 0 ? void 0 : data.id)
-        return (0, paginator_1.findRecord)("authors", { fields: [{ column: "authorId" }], seed: data === null || data === void 0 ? void 0 : data.id });
+        return (0, paginator_1.findRecord)("authors", { fields: [{ column: "authorId" }], defaultSeed: data === null || data === void 0 ? void 0 : data.id });
     let whereArgs = null;
     if (data === null || data === void 0 ? void 0 : data.seed)
         whereArgs = { fields: ["fullName"], seed: data === null || data === void 0 ? void 0 : data.seed };

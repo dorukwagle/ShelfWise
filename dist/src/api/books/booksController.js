@@ -27,7 +27,7 @@ const uploadHandler = (cb) => {
         });
     };
 };
-booksController.get("/search", auth_1.memberAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+booksController.get("/", auth_1.memberAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { data, statusCode, info } = yield (0, booksQueryModel_1.searchBooks)(req.query);
     res.status(statusCode).json({ data, info });
 }));

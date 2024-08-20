@@ -193,7 +193,7 @@ model BookInfo {
   subTitle String?
   editionStatement String?
   numberOfPages BigInt
-  publicationYear String
+  publicationYear Int
   seriesStatement String?
   addedDate DateTime @default(now())
   coverPhoto String @db.VarChar(2050)

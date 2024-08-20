@@ -14,10 +14,10 @@ const dbValidation_1 = require("../utils/dbValidation");
 const hasDuplicates = (data) => (new Set(data)).size !== data.length;
 class BookInfoValidator {
     constructor() {
-        this.uniqueClassNumber = (cn_1, ...args_1) => __awaiter(this, [cn_1, ...args_1], void 0, function* (cn, exclude = undefined) { return (0, dbValidation_1.unique)("bookInfo", "classNumber", cn, exclude); });
-        this.uniqueBookNumber = (bookNumber_1, ...args_1) => __awaiter(this, [bookNumber_1, ...args_1], void 0, function* (bookNumber, exclude = undefined) { return (0, dbValidation_1.unique)("bookInfo", "bookNumber", bookNumber, exclude); });
-        this.publisherExists = (publisherId_1, ...args_1) => __awaiter(this, [publisherId_1, ...args_1], void 0, function* (publisherId, exclude = undefined) { return (0, dbValidation_1.exists)("publishers", "publisherId", publisherId, exclude); });
-        this.eachBookAuthorsExists = (authorIds_1, ...args_1) => __awaiter(this, [authorIds_1, ...args_1], void 0, function* (authorIds, exclude = undefined) {
+        this.uniqueClassNumber = (cn, exclude) => __awaiter(this, void 0, void 0, function* () { return (0, dbValidation_1.unique)("bookInfo", "classNumber", cn, exclude); });
+        this.uniqueBookNumber = (bookNumber, exclude) => __awaiter(this, void 0, void 0, function* () { return (0, dbValidation_1.unique)("bookInfo", "bookNumber", bookNumber, exclude); });
+        this.publisherExists = (publisherId, exclude) => __awaiter(this, void 0, void 0, function* () { return (0, dbValidation_1.exists)("publishers", "publisherId", publisherId, exclude); });
+        this.eachBookAuthorsExists = (authorIds, exclude) => __awaiter(this, void 0, void 0, function* () {
             if (hasDuplicates(authorIds))
                 return false;
             for (const authorId of authorIds) {
@@ -27,7 +27,7 @@ class BookInfoValidator {
             }
             return true;
         });
-        this.eachUniqueIsbn = (isbns_1, ...args_1) => __awaiter(this, [isbns_1, ...args_1], void 0, function* (isbns, exclude = undefined) {
+        this.eachUniqueIsbn = (isbns, exclude) => __awaiter(this, void 0, void 0, function* () {
             if (hasDuplicates(isbns))
                 return false;
             for (const isbn of isbns) {
@@ -37,7 +37,7 @@ class BookInfoValidator {
             }
             return true;
         });
-        this.eachBookGenreExists = (genreIds_1, ...args_1) => __awaiter(this, [genreIds_1, ...args_1], void 0, function* (genreIds, exclude = undefined) {
+        this.eachBookGenreExists = (genreIds, exclude) => __awaiter(this, void 0, void 0, function* () {
             if (hasDuplicates(genreIds))
                 return false;
             for (const genreId of genreIds) {
@@ -47,7 +47,7 @@ class BookInfoValidator {
             }
             return true;
         });
-        this.eachUniqueBarcode = (barcodes_1, ...args_1) => __awaiter(this, [barcodes_1, ...args_1], void 0, function* (barcodes, exclude = undefined) {
+        this.eachUniqueBarcode = (barcodes, exclude) => __awaiter(this, void 0, void 0, function* () {
             if (hasDuplicates(barcodes))
                 return false;
             for (const barcode of barcodes) {
@@ -67,7 +67,8 @@ class BookInfoValidator {
             editionStatement: zod_1.z.string().optional(),
             numberOfPages: zod_1.z.coerce.number({ required_error: "number of pages is required" })
                 .min(1, "can't be less than 1"),
-            publicationYear: zod_1.z.string({ required_error: "publicationYear is required" }),
+            publicationYear: zod_1.z.number({ required_error: "publicationYear is required" })
+                .min(1, "can't be less than 1"),
             seriesStatement: zod_1.z.string().optional(),
             addedDate: zod_1.z.coerce.date().optional(),
             publisherId: zod_1.z.string({ required_error: "publisher is required" })
@@ -105,27 +106,27 @@ class BookInfoValidator {
             totalPieces: true,
             barcodes: true
         });
-        this.BookInfo = (exclude = undefined) => {
+        this.BookInfo = (exclude) => {
             this.exclude = exclude;
             return this.BookInfoSchema;
         };
-        this.BookInfoOnly = (exclude = undefined) => {
+        this.BookInfoOnly = (exclude) => {
             this.exclude = exclude;
             return this.BookInfoOnlySchema;
         };
-        this.BookGenresOnly = (exclude = undefined) => {
+        this.BookGenresOnly = (exclude) => {
             this.exclude = exclude;
             return this.BookGenresOnlySchema;
         };
-        this.BookAuthorsOnly = (exclude = undefined) => {
+        this.BookAuthorsOnly = (exclude) => {
             this.exclude = exclude;
             return this.BookAuthorsOnlySchema;
         };
-        this.BookPurchaseOnly = (exclude = undefined) => {
+        this.BookPurchaseOnly = (exclude) => {
             this.exclude = exclude;
             return this.BookPurchaseOnlySchema;
         };
-        this.ISBNsOnly = (exclude = undefined) => {
+        this.ISBNsOnly = (exclude) => {
             this.exclude = exclude;
             return this.ISBNsOnlySchema;
         };

@@ -72,7 +72,8 @@ class BookInfoValidator {
         editionStatement: z.string().optional(),
         numberOfPages: z.coerce.number({required_error: "number of pages is required"})
             .min(1, "can't be less than 1"),
-        publicationYear: z.string({required_error: "publicationYear is required"}),
+        publicationYear: z.coerce.number({required_error: "publicationYear is required"})
+            .min(1, "can't be less than 1"),
         seriesStatement: z.string().optional(),
         addedDate: z.coerce.date().optional(),
         publisherId: z.string({required_error: "publisher is required"})

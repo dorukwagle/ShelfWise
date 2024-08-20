@@ -43,7 +43,7 @@ describe("BooksController", async () => {
             subTitle: "subtitle",
             editionStatement: "hello edition",
             numberOfPages: 387,
-            publicationYear: "2019",
+            publicationYear: 2019,
             seriesStatement: "hello series",
             publisherId: "",
             bookAuthors: [""],
@@ -95,8 +95,8 @@ describe("BooksController", async () => {
             bookPayload.totalPieces = 8;
 
             const res = await getAgent().expect(400);
-
             const data = res.body;
+
             expect.soft(data.error).toContain("mismatch");
         });
 

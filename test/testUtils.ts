@@ -105,10 +105,10 @@ const createBooksMockData = async () => {
             classNumber: '001',
             bookNumber: 'B001',
             title: 'Harry Potter and the Philosopher\'s Stone',
-            subTitle: 'The boy who lived',
+            subTitle: 'The boy who lived, test',
             editionStatement: 'First Edition',
             numberOfPages: BigInt(223),
-            publicationYear: '1997',
+            publicationYear: 1997,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher1.publisherId,
             bookAuthors: {
@@ -137,7 +137,7 @@ const createBooksMockData = async () => {
             subTitle: 'A Song of Ice and Fire',
             editionStatement: 'First Edition',
             numberOfPages: BigInt(694),
-            publicationYear: '1996',
+            publicationYear: 1996,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher2.publisherId,
             bookAuthors: {
@@ -165,9 +165,9 @@ const createBooksMockData = async () => {
             bookNumber: 'B003',
             title: 'Foundation',
             subTitle: 'The Galactic Empire',
-            editionStatement: 'Revised Edition',
+            editionStatement: 'Revised Edition, test',
             numberOfPages: BigInt(255),
-            publicationYear: '1951',
+            publicationYear: 1951,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher2.publisherId,
             bookAuthors: {
@@ -194,9 +194,9 @@ const createBooksMockData = async () => {
             bookNumber: 'B004',
             title: 'Dune',
             subTitle: 'The desert planet',
-            editionStatement: 'First Edition',
+            editionStatement: 'First Edition, test',
             numberOfPages: BigInt(412),
-            publicationYear: '1965',
+            publicationYear: 1965,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher1.publisherId,
             bookAuthors: {
@@ -222,10 +222,10 @@ const createBooksMockData = async () => {
             classNumber: '005',
             bookNumber: 'B005',
             title: 'The Hobbit',
-            subTitle: 'There and Back Again',
+            subTitle: 'There and Back Again, test',
             editionStatement: 'Second Edition',
             numberOfPages: BigInt(310),
-            publicationYear: '1937',
+            publicationYear: 1937,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher1.publisherId,
             bookAuthors: {
@@ -254,7 +254,7 @@ const createBooksMockData = async () => {
             subTitle: 'A Dystopian Masterpiece',
             editionStatement: 'First Edition',
             numberOfPages: BigInt(311),
-            publicationYear: '1932',
+            publicationYear: 1932,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher2.publisherId,
             bookAuthors: {
@@ -279,11 +279,11 @@ const createBooksMockData = async () => {
         data: {
             classNumber: '007',
             bookNumber: 'B007',
-            title: 'The Catcher in the Rye',
+            title: 'The Catcher in the Rye, test',
             subTitle: 'A Timeless Classic',
             editionStatement: 'Second Edition',
             numberOfPages: BigInt(277),
-            publicationYear: '1951',
+            publicationYear: 1951,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher1.publisherId,
             bookAuthors: {
@@ -312,7 +312,7 @@ const createBooksMockData = async () => {
             subTitle: 'A Dystopian Novel',
             editionStatement: 'First Edition',
             numberOfPages: BigInt(328),
-            publicationYear: '1949',
+            publicationYear: 1949,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher2.publisherId,
             bookAuthors: {
@@ -341,7 +341,7 @@ const createBooksMockData = async () => {
             subTitle: 'A Novel of Racial Injustice',
             editionStatement: '50th Anniversary Edition',
             numberOfPages: BigInt(336),
-            publicationYear: '1960',
+            publicationYear: 1960,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher1.publisherId,
             bookAuthors: {
@@ -370,7 +370,7 @@ const createBooksMockData = async () => {
             subTitle: 'Part One of The Lord of the Rings',
             editionStatement: 'Revised Edition',
             numberOfPages: BigInt(423),
-            publicationYear: '1954',
+            publicationYear: 1954,
             coverPhoto: 'url_to_cover_photo',
             publisherId: publisher2.publisherId,
             bookAuthors: {
