@@ -6,7 +6,7 @@ import prismaClient from "../utils/prismaClient";
 
 const msg: {[key: string]: {error:string}} = {
     401: {error: "please login first"},
-    403: {error: "permission denied: you are not allowed here"}
+    403: {error: "permission denied: you are not allowed here"},
 }
 
 const getSession = async(req: Request) => {
@@ -59,10 +59,27 @@ const assistantManagerAuth = async (req: SessionRequest, res: Response, next: Ne
 const managerAuth = async (req: SessionRequest, res: Response, next: NextFunction) =>
     await validateAuthority(req, res, next, UserRoles.Manager);
 
+const withMembership = async (req: SessionRequest, res: Response, next: NextFunction) => {
+    const auth = await authGeneral(req, res);
+    if (!req.session) return auth;
+
+    const membership = await prismaClient.memberships.findFirst({
+        where: {userId: req.session.userId}
+    });
+
+    if (!membership)
+        return res.status(401).json({error: "You do not have a valid membership!"});
+    if (!(new Date() <= membership.expiryDate))
+        return res.status(403).json({error: "Your membership has expired!. please renew it."});
+
+    next();
+}
+
 export {
     authorize,
     memberAuth,
     coordinatorAuth,
     assistantManagerAuth,
-    managerAuth
+    managerAuth,
+    withMembership
 };

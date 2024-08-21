@@ -415,6 +415,7 @@ const clearUpSetup = async () => {
     await prismaClient.genres.deleteMany();
     await prismaClient.globalAttributes.deleteMany();
     await prismaClient.publishers.deleteMany();
+    await prismaClient.membershipTypes.deleteMany();
 
     await prismaClient.$disconnect();
     stopServer();
