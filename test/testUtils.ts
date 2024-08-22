@@ -10,7 +10,14 @@ import {
     Genres, Authors, Publishers, Sessions, PrismaClient
 } from "@prisma/client";
 import {UserRoles} from "../src/constants/enum";
-import {assistantManagerAuth, authorize, coordinatorAuth, managerAuth, memberAuth} from "../src/middlewares/auth";
+import {
+    assistantManagerAuth,
+    authorize,
+    coordinatorAuth,
+    managerAuth,
+    memberAuth,
+    withMembership
+} from "../src/middlewares/auth";
 import SessionRequest from "../src/entities/SessionRequest";
 import getUserInfo from "../src/utils/userUtils";
 import {startServer, stopServer} from "./singletorServer";
@@ -436,6 +443,9 @@ const createAuthorizationTestRoutes = () => {
 
     app.get("/manager", managerAuth, async (req: SessionRequest, res) =>
         res.status(200).send(await getUserInfo(req.session!.userId)));
+
+    app.get("/membership-test", withMembership, async (req: SessionRequest, res) =>
+        res.status(200).send({message: "Membership test"}));
 };
 
 const initialSetup = async () => {

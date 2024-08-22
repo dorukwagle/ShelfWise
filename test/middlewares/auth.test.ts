@@ -1,4 +1,4 @@
-import {afterAll, beforeAll, beforeEach, describe, expect, it} from "vitest";
+import {afterAll, afterEach, beforeAll, beforeEach, describe, expect, it} from "vitest";
 import {clearUpSetup, createAuthorizationTestRoutes, Entities, initialSetup} from "../testUtils";
 import prismaClient from "../../src/utils/prismaClient";
 import {v7} from "uuid";
@@ -193,5 +193,56 @@ describe("authorization test", async () => {
             expect.soft(res?.status).toBe(403);
             expect.soft((await res.json()).error).toBeTruthy();
         });
-    })
+    });
+
+    describe("withMembership authorization test", async () => {
+        const req = request("http://localhost:8080/membership-test");
+
+        beforeAll(async () => {
+            await clearUpSetup();
+        });
+
+        beforeEach(async () => {
+            await initialSetup();
+            req.setCookie('sessionId', Entities.session.session);
+        });
+
+        afterEach(async () => {
+           await clearUpSetup();
+        });
+
+        it("should return 401 if membership is not found", async () => {
+            await prismaClient.memberships.deleteMany();
+
+            const res = await req.get();
+
+            expect.soft(res?.status).toBe(401);
+            expect.soft((await res.json()).error).toContain('valid');
+        });
+
+        it("should return 403 if membership is expired", async () => {
+            const res = await req.get();
+
+            expect.soft(res?.status).toBe(403);
+            expect.soft((await res.json()).error).toContain('expired');
+        });
+
+        it("should return 200 if the user has valid membership", async () => {
+            const date = new Date();
+            date.setDate(date.getDate() + 1);
+
+            await prismaClient.memberships.update({
+               where: {
+                   membershipId: Entities.membership.membershipId
+               },
+                data: {
+                   expiryDate: date.toISOString(),
+                }
+            });
+
+            const res = await req.get();
+
+            expect.soft(res?.status).toBe(200);
+        });
+    });
 });
