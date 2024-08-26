@@ -16,6 +16,6 @@ const initializeRoutes = (app) => {
     app.use("/api/me", auth_1.authorize, meController_1.default);
     app.use("/api/auth", authController_1.default);
     app.use("/api/enrollments", enrollmentController_1.default);
-    app.use("/api/books", booksController_1.default);
+    app.use("/api/", booksController_1.default);
 };
 exports.default = initializeRoutes;

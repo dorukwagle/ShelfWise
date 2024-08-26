@@ -80,20 +80,12 @@ const findBooks = (seed, params) => __awaiter(void 0, void 0, void 0, function* 
     const whereArgs = {
         defaultSeed: seed,
         fields: [
-            { column: "classNumber" },
-            { column: "bookNumber" },
-            { column: "title", search: true },
-            { column: "subTitle", search: true },
-            { column: "editionStatement" },
-            { column: "numberOfPages", number: true },
-            { column: "publicationYear", number: true },
-            { column: "seriesStatement" },
             { column: "isbns", child: "isbn", oneToMany: true },
             { column: "books", child: "barcode", oneToMany: true },
             { column: "publisher", child: "publisherName" }
         ],
     };
     const includes = ["isbns", "books", "publisher"];
-    return (0, paginator_1.getPaginatedItems)("bookInfo", params, Object.assign(Object.assign({}, whereArgs), { operator: "AND" }), includes);
+    return (0, paginator_1.getPaginatedItems)("bookInfo", params, Object.assign(Object.assign({}, whereArgs), { operator: "OR" }), includes);
 });
 exports.findBooks = findBooks;

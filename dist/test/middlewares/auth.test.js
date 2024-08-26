@@ -159,4 +159,42 @@ const FetchRequest_1 = __importDefault(require("../FetchRequest"));
             vitest_1.expect.soft((yield res.json()).error).toBeTruthy();
         }));
     }));
+    (0, vitest_1.describe)("withMembership authorization test", () => __awaiter(void 0, void 0, void 0, function* () {
+        const req = request("http://localhost:8080/membership-test");
+        (0, vitest_1.beforeAll)(() => __awaiter(void 0, void 0, void 0, function* () {
+            yield (0, testUtils_1.clearUpSetup)();
+        }));
+        (0, vitest_1.beforeEach)(() => __awaiter(void 0, void 0, void 0, function* () {
+            yield (0, testUtils_1.initialSetup)();
+            req.setCookie('sessionId', testUtils_1.Entities.session.session);
+        }));
+        (0, vitest_1.afterEach)(() => __awaiter(void 0, void 0, void 0, function* () {
+            yield (0, testUtils_1.clearUpSetup)();
+        }));
+        (0, vitest_1.it)("should return 401 if membership is not found", () => __awaiter(void 0, void 0, void 0, function* () {
+            yield prismaClient_1.default.memberships.deleteMany();
+            const res = yield req.get();
+            vitest_1.expect.soft(res === null || res === void 0 ? void 0 : res.status).toBe(401);
+            vitest_1.expect.soft((yield res.json()).error).toContain('valid');
+        }));
+        (0, vitest_1.it)("should return 403 if membership is expired", () => __awaiter(void 0, void 0, void 0, function* () {
+            const res = yield req.get();
+            vitest_1.expect.soft(res === null || res === void 0 ? void 0 : res.status).toBe(403);
+            vitest_1.expect.soft((yield res.json()).error).toContain('expired');
+        }));
+        (0, vitest_1.it)("should return 200 if the user has valid membership", () => __awaiter(void 0, void 0, void 0, function* () {
+            const date = new Date();
+            date.setDate(date.getDate() + 1);
+            yield prismaClient_1.default.memberships.update({
+                where: {
+                    membershipId: testUtils_1.Entities.membership.membershipId
+                },
+                data: {
+                    expiryDate: date.toISOString(),
+                }
+            });
+            const res = yield req.get();
+            vitest_1.expect.soft(res === null || res === void 0 ? void 0 : res.status).toBe(200);
+        }));
+    }));
 }));

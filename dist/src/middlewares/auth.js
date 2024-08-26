@@ -12,12 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.managerAuth = exports.assistantManagerAuth = exports.coordinatorAuth = exports.memberAuth = exports.authorize = void 0;
+exports.withMembership = exports.managerAuth = exports.assistantManagerAuth = exports.coordinatorAuth = exports.memberAuth = exports.authorize = void 0;
 const enum_1 = require("../constants/enum");
 const prismaClient_1 = __importDefault(require("../utils/prismaClient"));
 const msg = {
     401: { error: "please login first" },
-    403: { error: "permission denied: you are not allowed here" }
+    403: { error: "permission denied: you are not allowed here" },
 };
 const getSession = (req) => __awaiter(void 0, void 0, void 0, function* () {
     const sessionCookie = req.cookies.sessionId;
@@ -65,3 +65,19 @@ const assistantManagerAuth = (req, res, next) => __awaiter(void 0, void 0, void 
 exports.assistantManagerAuth = assistantManagerAuth;
 const managerAuth = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () { return yield validateAuthority(req, res, next, enum_1.UserRoles.Manager); });
 exports.managerAuth = managerAuth;
+const withMembership = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    const auth = yield authGeneral(req, res);
+    if (!req.session)
+        return auth;
+    const membership = yield prismaClient_1.default.memberships.findFirst({
+        where: { userId: req.session.userId }
+    });
+    if (!membership)
+        return res.status(401).json({ error: "You do not have a valid membership!" });
+    if (membership.status !== "Active")
+        return res.status(423).json({ error: "Your membership has been deactivated" });
+    if (!(new Date() <= membership.expiryDate))
+        return res.status(403).json({ error: "Your membership has expired!. please renew it." });
+    next();
+});
+exports.withMembership = withMembership;

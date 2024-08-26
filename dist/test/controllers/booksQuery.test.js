@@ -26,7 +26,7 @@ const prismaClient_1 = __importDefault(require("../../src/utils/prismaClient"));
         yield (0, testUtils_1.clearBooksData)();
         yield (0, testUtils_1.clearUpSetup)();
     }));
-    vitest_1.describe.skip("GET /api/books", () => __awaiter(void 0, void 0, void 0, function* () {
+    (0, vitest_1.describe)("GET /api/books", () => __awaiter(void 0, void 0, void 0, function* () {
         const req = new FetchRequest_1.default(`http://localhost:${testUtils_1.port}/api/books`)
             .setDefaultHeaders();
         (0, vitest_1.beforeAll)(() => __awaiter(void 0, void 0, void 0, function* () {
@@ -117,14 +117,26 @@ const prismaClient_1 = __importDefault(require("../../src/utils/prismaClient"));
         }));
         (0, vitest_1.it)("should return books with given number of pages", () => __awaiter(void 0, void 0, void 0, function* () {
             const res = yield (0, testUtils_1.executeSafely)(() => req.get("?", {
-                seed: '250'
+                seed: 'Pearson'
             }));
             const { data } = yield res.json();
-            console.log('data', data);
             vitest_1.expect.soft(res.status).toBe(200);
             vitest_1.expect.soft(data.length).toBeTruthy();
+            data.forEach((book) => {
+                vitest_1.expect.soft(book.publisher.publisherName).toContain('Pearson');
+            });
         }));
-        (0, vitest_1.it)("should return books with given barcode", () => __awaiter(void 0, void 0, void 0, function* () {
+        (0, vitest_1.it)("should return books with given isbn", () => __awaiter(void 0, void 0, void 0, function* () {
+            const isbn = "978-0061120084"; //from testUtils.ts
+            const res = yield (0, testUtils_1.executeSafely)(() => req.get("?", {
+                seed: isbn
+            }));
+            const { data } = yield res.json();
+            vitest_1.expect.soft(res.status).toBe(200);
+            vitest_1.expect.soft(data.length).toBeTruthy();
+            data.forEach((book) => {
+                vitest_1.expect.soft(book.isbns[0].isbn).toContain(isbn);
+            });
         }));
     }));
 }));

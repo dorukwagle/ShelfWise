@@ -11,7 +11,7 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason, p) => {
   logger.error('Unhandled Rejection', { reason, p });
   process.exit(1);
-});
+}); 
 
 const gracefulShutdown = () => {
   server.close(() => {

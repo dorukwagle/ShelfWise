@@ -65,7 +65,7 @@ const path_1 = __importDefault(require("path"));
             subTitle: "subtitle",
             editionStatement: "hello edition",
             numberOfPages: 387,
-            publicationYear: "2019",
+            publicationYear: 2019,
             seriesStatement: "hello series",
             publisherId: "",
             bookAuthors: [""],

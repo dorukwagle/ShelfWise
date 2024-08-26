@@ -6,6 +6,7 @@ import attributes from "../api/attributes/attributesController";
 import { authorize } from "../middlewares/auth";
 import enrollment from "../api/enrollment/enrollmentController";
 import booksController from "../api/books/booksController";
+import reservationController from "../api/bookflow/reservations/reservationController";
 
 
 const initializeRoutes = (app: Express): void => {
@@ -16,6 +17,8 @@ const initializeRoutes = (app: Express): void => {
     app.use("/api/auth", auth);
     app.use("/api/enrollments", enrollment);
     app.use("/api/books", booksController);
+    app.use("/api/bookflow/reservations", reservationController);
+    
 }
 
 export default initializeRoutes;

@@ -53,7 +53,7 @@ const Entities = {};
 exports.Entities = Entities;
 exports.port = process.env.PORT || 8080;
 exports.testPrisma = new client_1.PrismaClient({
-    datasourceUrl: process.env.TEST_DATABASE_URL,
+    datasourceUrl: process.env.TEST_DATABASE_URL
 });
 exports.imagesUploadPath = path_1.default.join(process.cwd(), "storage/uploads/images");
 const executeSafely = (func) => __awaiter(void 0, void 0, void 0, function* () {
@@ -68,325 +68,328 @@ exports.executeSafely = executeSafely;
 const createBooksMockData = () => __awaiter(void 0, void 0, void 0, function* () {
     const publisher1 = yield prismaClient_1.default.publishers.create({
         data: {
-            publisherName: 'Pearson Education',
-            address: '221B Baker Street, London',
-        },
+            publisherName: "Pearson Education",
+            address: "221B Baker Street, London"
+        }
     });
     const publisher2 = yield prismaClient_1.default.publishers.create({
         data: {
-            publisherName: 'O’Reilly Media',
-            address: '1005 Gravenstein Highway North, Sebastopol, CA',
-        },
+            publisherName: "O’Reilly Media",
+            address: "1005 Gravenstein Highway North, Sebastopol, CA"
+        }
     });
     // Create some authors
     const author1 = yield prismaClient_1.default.authors.create({
         data: {
-            fullName: 'J.K. Rowling',
-        },
+            fullName: "J.K. Rowling"
+        }
     });
     const author2 = yield prismaClient_1.default.authors.create({
         data: {
-            fullName: 'George R.R. Martin',
-        },
+            fullName: "George R.R. Martin"
+        }
     });
     const author3 = yield prismaClient_1.default.authors.create({
         data: {
-            fullName: 'Isaac Asimov',
-        },
+            fullName: "Isaac Asimov"
+        }
     });
     // Create some genres
     const genre1 = yield prismaClient_1.default.genres.create({
         data: {
-            genre: 'Fantasy',
-        },
+            genre: "Fantasy"
+        }
     });
     const genre2 = yield prismaClient_1.default.genres.create({
         data: {
-            genre: 'Science Fiction',
-        },
+            genre: "Science Fiction"
+        }
     });
     // Create some books
     const book1 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '001',
-            bookNumber: 'B001',
-            title: 'Harry Potter and the Philosopher\'s Stone',
-            subTitle: 'The boy who lived, test',
-            editionStatement: 'First Edition',
+            classNumber: "001",
+            bookNumber: "B001",
+            title: "Harry Potter and the Philosopher's Stone",
+            subTitle: "The boy who lived, test",
+            editionStatement: "First Edition",
             numberOfPages: BigInt(223),
             publicationYear: 1997,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher1.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author1.authorId },
-                ],
+                    { authorId: author1.authorId }
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre1.genreId },
-                ],
+                    { genreId: genre1.genreId }
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0747532699' },
-                ],
-            },
-        },
+                    { isbn: "978-0747532699" }
+                ]
+            }
+        }
     });
     const book2 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '002',
-            bookNumber: 'B002',
-            title: 'A Game of Thrones',
-            subTitle: 'A Song of Ice and Fire',
-            editionStatement: 'First Edition',
+            classNumber: "002",
+            bookNumber: "B002",
+            title: "A Game of Thrones",
+            subTitle: "A Song of Ice and Fire",
+            editionStatement: "First Edition",
             numberOfPages: BigInt(694),
             publicationYear: 1996,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher2.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author2.authorId },
-                ],
+                    { authorId: author2.authorId }
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre1.genreId },
-                ],
+                    { genreId: genre1.genreId }
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0553103540' },
-                ],
-            },
-        },
+                    { isbn: "978-0553103540" }
+                ]
+            }
+        }
     });
     // Add more books as needed
-    yield prismaClient_1.default.bookInfo.create({
+    const book3 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '003',
-            bookNumber: 'B003',
-            title: 'Foundation',
-            subTitle: 'The Galactic Empire',
-            editionStatement: 'Revised Edition, test',
+            classNumber: "003",
+            bookNumber: "B003",
+            title: "Foundation",
+            subTitle: "The Galactic Empire",
+            editionStatement: "Revised Edition, test",
             numberOfPages: BigInt(255),
             publicationYear: 1951,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher2.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author3.authorId },
-                ],
+                    { authorId: author3.authorId }
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre2.genreId },
-                ],
+                    { genreId: genre2.genreId }
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0553293357' },
-                ],
-            },
-        },
+                    { isbn: "978-0553293357" }
+                ]
+            }
+        }
     });
-    yield prismaClient_1.default.bookInfo.create({
+    const book4 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '004',
-            bookNumber: 'B004',
-            title: 'Dune',
-            subTitle: 'The desert planet',
-            editionStatement: 'First Edition, test',
+            classNumber: "004",
+            bookNumber: "B004",
+            title: "Dune",
+            subTitle: "The desert planet",
+            editionStatement: "First Edition, test",
             numberOfPages: BigInt(412),
             publicationYear: 1965,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher1.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author3.authorId },
-                ],
+                    { authorId: author3.authorId }
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre2.genreId },
-                ],
+                    { genreId: genre2.genreId }
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0441013593' },
-                ],
-            },
-        },
+                    { isbn: "978-0441013593" }
+                ]
+            }
+        }
     });
-    yield prismaClient_1.default.bookInfo.create({
+    const book5 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '005',
-            bookNumber: 'B005',
-            title: 'The Hobbit',
-            subTitle: 'There and Back Again, test',
-            editionStatement: 'Second Edition',
+            classNumber: "005",
+            bookNumber: "B005",
+            title: "The Hobbit",
+            subTitle: "There and Back Again, test",
+            editionStatement: "Second Edition",
             numberOfPages: BigInt(310),
             publicationYear: 1937,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher1.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author1.authorId },
-                ],
+                    { authorId: author1.authorId }
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre1.genreId },
-                ],
+                    { genreId: genre1.genreId }
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0618968633' },
-                ],
-            },
-        },
+                    { isbn: "978-0618968633" }
+                ]
+            }
+        }
     });
-    yield prismaClient_1.default.bookInfo.create({
+    const book6 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '006',
-            bookNumber: 'B006',
-            title: 'Brave New World',
-            subTitle: 'A Dystopian Masterpiece',
-            editionStatement: 'First Edition',
+            classNumber: "006",
+            bookNumber: "B006",
+            title: "Brave New World",
+            subTitle: "A Dystopian Masterpiece",
+            editionStatement: "First Edition",
             numberOfPages: BigInt(311),
             publicationYear: 1932,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher2.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author2.authorId }, // George R.R. Martin used here as an example
-                ],
+                    { authorId: author2.authorId } // George R.R. Martin used here as an example
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre2.genreId }, // Science Fiction
-                ],
+                    { genreId: genre2.genreId } // Science Fiction
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0060850524' },
-                ],
-            },
-        },
+                    { isbn: "978-0060850524" }
+                ]
+            }
+        }
     });
-    yield prismaClient_1.default.bookInfo.create({
+    const book7 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '007',
-            bookNumber: 'B007',
-            title: 'The Catcher in the Rye, test',
-            subTitle: 'A Timeless Classic',
-            editionStatement: 'Second Edition',
+            classNumber: "007",
+            bookNumber: "B007",
+            title: "The Catcher in the Rye, test",
+            subTitle: "A Timeless Classic",
+            editionStatement: "Second Edition",
             numberOfPages: BigInt(277),
             publicationYear: 1951,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher1.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author1.authorId }, // J.K. Rowling used here as an example
-                ],
+                    { authorId: author1.authorId } // J.K. Rowling used here as an example
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre1.genreId }, // Fantasy
-                ],
+                    { genreId: genre1.genreId } // Fantasy
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0316769488' },
-                ],
-            },
-        },
+                    { isbn: "978-0316769488" }
+                ]
+            }
+        }
     });
-    yield prismaClient_1.default.bookInfo.create({
+    const book8 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '008',
-            bookNumber: 'B008',
-            title: '1984',
-            subTitle: 'A Dystopian Novel',
-            editionStatement: 'First Edition',
+            classNumber: "008",
+            bookNumber: "B008",
+            title: "1984",
+            subTitle: "A Dystopian Novel",
+            editionStatement: "First Edition",
             numberOfPages: BigInt(328),
             publicationYear: 1949,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher2.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author3.authorId }, // Isaac Asimov used here as an example
-                ],
+                    { authorId: author3.authorId } // Isaac Asimov used here as an example
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre2.genreId }, // Science Fiction
-                ],
+                    { genreId: genre2.genreId } // Science Fiction
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0451524935' },
-                ],
-            },
-        },
+                    { isbn: "978-0451524935" }
+                ]
+            }
+        }
     });
-    yield prismaClient_1.default.bookInfo.create({
+    const book9 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '009',
-            bookNumber: 'B009',
-            title: 'To Kill a Mockingbird',
-            subTitle: 'A Novel of Racial Injustice',
-            editionStatement: '50th Anniversary Edition',
+            classNumber: "009",
+            bookNumber: "B009",
+            title: "To Kill a Mockingbird",
+            subTitle: "A Novel of Racial Injustice",
+            editionStatement: "50th Anniversary Edition",
             numberOfPages: BigInt(336),
             publicationYear: 1960,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher1.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author2.authorId }, // George R.R. Martin used here as an example
-                ],
+                    { authorId: author2.authorId } // George R.R. Martin used here as an example
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre1.genreId }, // Fantasy
-                ],
+                    { genreId: genre1.genreId } // Fantasy
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0061120084' },
-                ],
-            },
-        },
+                    { isbn: "978-0061120084" }
+                ]
+            }
+        }
     });
-    yield prismaClient_1.default.bookInfo.create({
+    const book10 = yield prismaClient_1.default.bookInfo.create({
         data: {
-            classNumber: '010',
-            bookNumber: 'B010',
-            title: 'The Lord of the Rings: The Fellowship of the Ring',
-            subTitle: 'Part One of The Lord of the Rings',
-            editionStatement: 'Revised Edition',
+            classNumber: "010",
+            bookNumber: "B010",
+            title: "The Lord of the Rings: The Fellowship of the Ring",
+            subTitle: "Part One of The Lord of the Rings",
+            editionStatement: "Revised Edition",
             numberOfPages: BigInt(423),
             publicationYear: 1954,
-            coverPhoto: 'url_to_cover_photo',
+            coverPhoto: "url_to_cover_photo",
             publisherId: publisher2.publisherId,
             bookAuthors: {
                 create: [
-                    { authorId: author1.authorId }, // J.K. Rowling used here as an example
-                ],
+                    { authorId: author1.authorId } // J.K. Rowling used here as an example
+                ]
             },
             bookGenres: {
                 create: [
-                    { genreId: genre1.genreId }, // Fantasy
-                ],
+                    { genreId: genre1.genreId } // Fantasy
+                ]
             },
             isbns: {
                 create: [
-                    { isbn: '978-0547928210' },
-                ],
-            },
-        },
+                    { isbn: "978-0559128224" },
+                    { isbn: "978-05479228219" },
+                    { isbn: "978-05478122163" }
+                ]
+            }
+        }
     });
+    Entities.bookInfos = [book10, book2, book3, book4, book5, book6, book7, book8, book9, book1];
 });
 exports.createBooksMockData = createBooksMockData;
 const clearBooksData = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -410,6 +413,7 @@ const clearUpSetup = () => __awaiter(void 0, void 0, void 0, function* () {
     yield prismaClient_1.default.genres.deleteMany();
     yield prismaClient_1.default.globalAttributes.deleteMany();
     yield prismaClient_1.default.publishers.deleteMany();
+    yield prismaClient_1.default.membershipTypes.deleteMany();
     yield prismaClient_1.default.$disconnect();
     (0, singletorServer_1.stopServer)();
 });
@@ -420,6 +424,7 @@ const createAuthorizationTestRoutes = () => {
     app_1.default.get("/coordinator", auth_1.coordinatorAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () { return res.status(200).send(yield (0, userUtils_1.default)(req.session.userId)); }));
     app_1.default.get("/assistant", auth_1.assistantManagerAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () { return res.status(200).send(yield (0, userUtils_1.default)(req.session.userId)); }));
     app_1.default.get("/manager", auth_1.managerAuth, (req, res) => __awaiter(void 0, void 0, void 0, function* () { return res.status(200).send(yield (0, userUtils_1.default)(req.session.userId)); }));
+    app_1.default.get("/membership-test", auth_1.withMembership, (req, res) => __awaiter(void 0, void 0, void 0, function* () { return res.status(200).send({ message: "Membership test" }); }));
 };
 exports.createAuthorizationTestRoutes = createAuthorizationTestRoutes;
 const initialSetup = () => __awaiter(void 0, void 0, void 0, function* () {

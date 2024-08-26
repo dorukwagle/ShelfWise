@@ -32,6 +32,7 @@ const paginateItems = (page_1, size_1, _a, includes_1, sort_1) => __awaiter(void
     let orderBy = {};
     if (includes === null || includes === void 0 ? void 0 : includes.length)
         includes.forEach(item => include[item] = true);
+    const operator = (whereArgs === null || whereArgs === void 0 ? void 0 : whereArgs.operator) || "AND";
     if (whereArgs === null || whereArgs === void 0 ? void 0 : whereArgs.fields.length) {
         whereArgs.fields.forEach(item => {
             let seed = item.seed || whereArgs.defaultSeed;
@@ -46,28 +47,27 @@ const paginateItems = (page_1, size_1, _a, includes_1, sort_1) => __awaiter(void
                 { [item.search ? "search" : "contains"]: seed };
             const whereObj = {};
             whereObj[item.column] = item.child ?
-                (item.oneToMany ? { every: relationFilter } : relationFilter) : itemFilter;
+                (item.oneToMany ? { [operator === "AND" ? "every" : "some"]: relationFilter } : relationFilter) : itemFilter;
             where.push(whereObj);
         });
     }
     if (sort)
         orderBy = sort;
-    const operator = (whereArgs === null || whereArgs === void 0 ? void 0 : whereArgs.operator) || "And";
+    const whereWithOperator = {
+        [operator]: where
+    };
     const query = {
         skip: Math.abs((page - 1) * size),
         take: size,
-        where: {
-            [operator === "And" ? "AND" : "OR"]: where
-        },
+        where: whereWithOperator,
         include,
         orderBy
     };
-    console.log(query.where);
     // @ts-ignore
     res.data = yield prismaClient_1.default[model].findMany(query);
     // @ts-ignore
     const itemsCount = yield prismaClient_1.default[model].count({
-        where
+        where: whereWithOperator
     });
     res.info = {
         itemsCount,

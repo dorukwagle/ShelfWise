@@ -11,7 +11,6 @@ import {
 import FetchRequest from "../FetchRequest";
 import {DEFAULT_PAGE_SIZE} from "../../src/constants/constants";
 import prismaClient from "../../src/utils/prismaClient";
-import author from "../../src/validations/Author";
 
 describe("Books Query", async () => {
     beforeAll(async () => {

@@ -69,6 +69,10 @@ const withMembership = async (req: SessionRequest, res: Response, next: NextFunc
 
     if (!membership)
         return res.status(401).json({error: "You do not have a valid membership!"});
+
+    if (membership.status !== "Active")
+        return res.status(423).json({error: "Your membership has been deactivated"});
+
     if (!(new Date() <= membership.expiryDate))
         return res.status(403).json({error: "Your membership has expired!. please renew it."});
 

@@ -18,7 +18,7 @@ enrollment.post("/request", async (req, res) => {
 });
 
 enrollment.post("/approve/:userId", assistantManagerAuth, async (req: SessionRequest<{ userId: string }>, res) => {
-    const {statusCode, data, error} = await approveEnrollment(req.params.userId, req.body);
+const {statusCode, data, error} = await approveEnrollment(req.params.userId, req.body);
     return res.status(statusCode).json(error ? error : data);
 });
 
