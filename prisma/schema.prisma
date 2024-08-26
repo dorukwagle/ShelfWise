@@ -47,6 +47,11 @@ enum EBookRequestStatus {
   Resolved
 }
 
+enum EIssuesType {
+  Active
+  Returned
+}
+
 enum EPaymentType {
   Membership
   Penalty
@@ -120,6 +125,7 @@ model Users {
   ratings Ratings[]
   sessions Sessions[]
   membership Memberships?
+  reservations BookReservations[]
 }
 
 model Memberships {
@@ -317,6 +323,7 @@ model Issues {
   renewalRequestedAt DateTime?
   renewalRequest Boolean @default(false)
   renewalCount Int @default(0)
+  status EIssuesType @default(Active)
   bookId String
   book Books @relation(fields: [bookId], references: [bookId])
   userId String
@@ -329,11 +336,13 @@ model Issues {
 
 model BookReservations {
   reservationId String @id @default(cuid())
+  userId String
   reservationDate DateTime @db.Timestamp(3) @default(now())
   status EReservationStatus @default(Pending)
   bookId String?
   bookInfoId String
   book Books? @relation(fields: [bookId], references: [bookId])
+  user Users @relation(fields: [userId], references: [userId])
   bookInfo BookInfo @relation(fields: [bookInfoId], references: [bookInfoId])
   createdAt DateTime @default(now()) @db.Timestamp(3)
   updatedAt DateTime @updatedAt @db.Timestamp(3)
