@@ -337,7 +337,7 @@ model Issues {
 model BookReservations {
   reservationId String @id @default(cuid())
   userId String
-  reservationDate DateTime @db.Timestamp(3) @default(now())
+  reservationDate DateTime? @db.Timestamp(3)
   status EReservationStatus @default(Pending)
   bookId String?
   bookInfoId String

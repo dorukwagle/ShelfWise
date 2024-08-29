@@ -397,6 +397,13 @@ const createBooksMockData = async () => {
                     {isbn: "978-05479228219"},
                     {isbn: "978-05478122163"}
                 ]
+            },
+            books: {
+                create: [
+                    {barcode: "123456789"},
+                    {barcode: "1234563789"},
+                    {barcode: "123456089"},
+                ]
             }
         }
     });
@@ -405,11 +412,14 @@ const createBooksMockData = async () => {
 };
 
 const clearBooksData = async () => {
-    await prismaClient.books.deleteMany();
+    await prismaClient.issues.deleteMany();
     await prismaClient.isbns.deleteMany();
     await prismaClient.bookPurchases.deleteMany();
     await prismaClient.bookWithGenres.deleteMany();
     await prismaClient.bookWithAuthors.deleteMany();
+    await prismaClient.bookReservations.deleteMany();
+    await prismaClient.issues.deleteMany();
+    await prismaClient.books.deleteMany();
     await prismaClient.bookInfo.deleteMany();
 
     const basePath = process.cwd() + "/storage/uploads/images";
