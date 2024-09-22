@@ -240,7 +240,7 @@ describe("Books Flow", async () => {
       const data = await res?.json();
 
       expect.soft(res?.status).toBe(400);
-      expect.soft(data?.error).toContain("assign");
+      expect.soft(data?.error).toContain("without");
     });
   });
 });

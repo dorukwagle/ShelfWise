@@ -192,7 +192,7 @@ const confirmReservation = async (reservationId: string) => {
     });
 
     if (!reservation.bookId) {
-        res.error = {error: "Please assign the book first"};
+        res.error = {error: "Reservation confirmed without book"};
         return res;
     };
 
