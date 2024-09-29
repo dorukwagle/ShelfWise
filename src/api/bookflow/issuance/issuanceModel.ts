@@ -1,6 +1,10 @@
-import { BookReservations } from "@prisma/client";
+import { BookReservations, Issues } from "@prisma/client";
 import ModelReturnTypes from "../../../entities/ModelReturnTypes";
 import prismaClient from "../../../utils/prismaClient";
+import PaginationReturnTypes from "../../../entities/PaginationReturnTypes";
+import IssueFilter, { IssueFilterType } from "../../../validations/IssueFilter";
+import formatValidationErrors from "../../../utils/formatValidationErrors";
+import { getPaginatedItems } from "../../../utils/paginator";
 
 
 const freePreviousReservation = async (barcode: string) => {
@@ -219,6 +223,28 @@ const returnBook = async (issueId: string) => {
     return res;
 }
 
+const getIssues = async (body: IssueFilterType) => {
+    const validation = IssueFilter.safeParse(body);
+    const errRes = formatValidationErrors<IssueFilterType>(validation);
+    if (errRes) return errRes;
+
+    const query = validation.data!;
+    
+    return await getPaginatedItems("issues", query, {
+        defaultSeed: query.seed!,
+        operator: "OR",
+        fields: [
+            {column: "status", seed: query.status},
+            {column: "user", child: "fullName"},
+            {column: "book", child: "barcode"},
+            {column: "book", child: "bookInfoId"},
+        ]
+        
+    }, [], {created_at: "desc"});
+}
+
 export {
-    issueBook
+    issueBook,
+    returnBook,
+    getIssues
 }

@@ -3,7 +3,7 @@ import PaginationReturnTypes from "../entities/PaginationReturnTypes";
 import {DEFAULT_PAGE_SIZE} from "../constants/constants";
 import prismaClient from "./prismaClient";
 
-type model = "genres" | "publishers" | "authors" | "bookInfo" | "bookReservations";
+type model = "genres" | "publishers" | "authors" | "bookInfo" | "bookReservations" | "issues";
 
 export type WhereArgs = {
     fields: { column: string, child?: string, search?: boolean, seed?: any, oneToMany?: boolean, number?: boolean }[],

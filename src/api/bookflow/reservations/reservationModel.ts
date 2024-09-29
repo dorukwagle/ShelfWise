@@ -226,7 +226,7 @@ const getReservations = async (data: ReservationFilterParamsType) => {
    if (validation.data?.id)
         whereArgs.fields.push({column: "userId", seed: validation.data.id});
 
-    return await getPaginatedItems("bookReservations", data, whereArgs, include, sorting);
+    return await getPaginatedItems("bookReservations", validation.data!, whereArgs, include, sorting);
 };
 
 const cancelReservation = async (reservationId: string) => {

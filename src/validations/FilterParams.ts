@@ -8,7 +8,8 @@ const FilterParams = z.object({
         .optional(),
     pageSize: z.coerce.number()
         .min(3)
-        .optional()
+        .optional(),
+    status: z.string().optional()
 });
 
 export type FilterParamsType = z.infer<typeof FilterParams>;
